@@ -1,23 +1,3 @@
-// function getLinkInfo(linkUrl) {
-//   const linkElements = document.querySelectorAll(`a[href='${linkUrl}']`);
-//   if (linkElements.length > 0) {
-//     const linkElement = linkElements[0];
-//     const linkText = linkElement.innerText || linkElement.textContent;
-//     const pageTitle = document.title;
-//     const sourceUrl = window.location.href;
-//     const id = linkElement.id;
-
-//     chrome.runtime.sendMessage({
-//       linkText: linkText,
-//       title: pageTitle,
-//       sourceUrl: sourceUrl,
-//       href: linkUrl,
-//       id: id
-//     });
-//   }
-// }
-
-
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({
     id: "linkInfo",
@@ -25,8 +5,6 @@ chrome.runtime.onInstalled.addListener(() => {
     contexts: ["link"]
   });
 });
-
-
 
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   if (info.menuItemId === "linkInfo") {
@@ -49,13 +27,6 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   
     })();
 
-
-
-    // chrome.scripting.executeScript({
-    //   target: { tabId: tab.id },
-    //   func: getLinkInfo,
-    //   args: [info.linkUrl]
-    // });
   }
 });
 
