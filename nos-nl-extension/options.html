@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>NOS.NL Extension Options</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    label {
+      display: block;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>NOS.NL Extension Options</h1>
+  <label>
+    Keywords (comma separated):
+    <input type="text" id="highlightKeywords" placeholder="voetbal,kabinet,gaza"/>
+  </label>
+  <label>
+    Hide Numbers:
+    <input type="checkbox" id="hideNumbers" />
+  </label>
+  <button id="save">Save</button>
+
+  <script src="options.js"></script>
+</body>
+</html>

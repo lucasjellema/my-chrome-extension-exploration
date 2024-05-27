@@ -1,10 +1,27 @@
-console.log(`content.js loaded`)
+const fetchOptions = async (callforward) => {
+  console.log(`fetching options (from background)`);
+  (async () => {
+    const response = await chrome.runtime.sendMessage({ type: 'optionsRequest' });
+    // do something with response here, not outside the function
+    console.log(response);
+    console.log(`options: ${response.options}`, response.options)
+    Object.assign(extensionOptions, response.options);
+    callforward()
+  })();
+}
 
-const NEWS_ITEM_LI_CLASS = "sc-27eaedb2-0"
+const extensionOptions = {}
+const NEWS_ITEM_LI_CLASS = "sc-27eaedb2-0" //BRITTLE! This class name can change
 
-const processNewsItems = () => {
+
+const processNewsItems = async () => {
+
+  console.log(`processNewsItems`, extensionOptions)
   const newsItems = document.getElementsByClassName(NEWS_ITEM_LI_CLASS)
   console.log(`Found ${newsItems.length} news items`)
+
+  // highlight all items with one of the keywords in the title
+  console.log(`extensionOptions.highlightKeywords`, extensionOptions.highlightKeywords)
   for (let i = 0; i < newsItems.length; i++) {
     const newsItemElement = newsItems[i]
     addButtonToNewsItem(newsItemElement)
@@ -23,11 +40,8 @@ const addButtonToNewsItem = (newsItemElement) => {
     // link has two direct div children; first one contains image  , the second the heading  (h2) and body (p)
 
     if (link) {
-      const divs = link.getElementsByTagName('div')
-
-      
-      const heading = link.children[1].getElementsByTagName('h2')[0].textContent   
-      const body = link.children[1].getElementsByTagName('p')[0].textContent   
+      const heading = link.children[1].getElementsByTagName('h2')[0].textContent
+      const body = link.children[1].getElementsByTagName('p')[0].textContent
       const item = { heading, body, itemUrl: link.href }
       console.log(link, item)
       chrome.runtime.sendMessage({ action: 'saveNewsItem', data: item });
@@ -36,4 +50,17 @@ const addButtonToNewsItem = (newsItemElement) => {
   };
   newsItemElement.appendChild(button);
 }
-processNewsItems()
+
+console.log(`content.js nos.nl extension loaded, go process news items`)
+fetchOptions(processNewsItems)
+
+//document.addEventListener('DOMContentLoaded', processNewsItems);
+
+// if content changes of div with class sc-65aa59f2-0, then process newsItems again
+
+const NEWS_ITEM_CONTAINER_CLASS = "sc-65aa59f2-0" //BRITTLE! This class name can change
+const observerNewsItemContainer = new MutationObserver(processNewsItems);
+
+const newsItemContainer = document.getElementsByClassName(NEWS_ITEM_CONTAINER_CLASS)[0]
+  
+//  observerNewsItemContainer.observe(newsItemContainer, { childList: true, subtree: true });

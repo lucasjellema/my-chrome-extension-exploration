@@ -7,5 +7,9 @@ It adds a button to all news items. The button, when pressed, sends a message to
 TODO:
 * add highlighting for keywords
 * replace numbers with # (to not spoil the surprise with football scores)
+* allow user to set options for the extension - such as the keywords to highlight?
 * ...
 
+# Resources
+
+Options for Extensions - https://developer.chrome.com/docs/extensions/develop/ui/options-page 
