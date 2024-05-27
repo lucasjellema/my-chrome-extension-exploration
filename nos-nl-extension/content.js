@@ -30,6 +30,7 @@ const processNewsItems = async () => {
 }
 
 const highlightItem = (newsItemElement) => {
+if (!extensionOptions.highlightKeywords) return
   const link = newsItemElement.getElementsByTagName('a')[0]
   // link has two direct div children; first one contains image  , the second the heading  (h2) and body (p)
   const keywords = extensionOptions.highlightKeywords.toLowerCase().split(',')
