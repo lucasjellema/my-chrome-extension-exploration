@@ -13,7 +13,7 @@ const options = {
 
 const listenForOptionChanges = () => {
   chrome.storage.onChanged.addListener((changes, namespace) => {
-    console.log(`listener for storage changes has fired`)
+    console.log(`listener for storage changes in background.js has fired`)
     for (let [key, { oldValue, newValue }] of Object.entries(changes)) {
       console.log(
         `Storage key "${key}" in namespace "${namespace}" changed.`,
@@ -21,7 +21,7 @@ const listenForOptionChanges = () => {
       );
     }
     restoreOptions()
-    sendOptionsToContent()
+    // sendOptionsToContent() // content.js is listening itself for changes
   });
 }
 
@@ -35,7 +35,6 @@ const sendOptionsToContent = () => {
   } catch (error) {
       console.error('failed to send options',error); // probably because the tab is not active because the options page is active?! perhaps have content.js ask for current options every X seconds??
     }
-    
 
   })();
 }

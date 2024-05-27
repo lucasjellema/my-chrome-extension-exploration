@@ -90,26 +90,32 @@ const addButtonToNewsItem = (newsItemElement) => {
 console.log(`content.js nos.nl extension loaded, go process news items`)
 fetchOptions(processNewsItems)
 
-
-// wait for updates in options - then reprocess page; note: previous changes are not reversed
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  console.log("Received message:", message);
-  if (message.type === 'optionsUpdate') {
-    Object.assign(extensionOptions, message.options);
-    console.log(`options: ${extensionOptions}`, extensionOptions)
-    processNewsItems()
-    sendResponse({ status: 'success', msg:"options processed" });
-  }
-});
-
-
-//document.addEventListener('DOMContentLoaded', processNewsItems);
-
 // if content changes of div with class sc-65aa59f2-0, then process newsItems again
 
-const NEWS_ITEM_CONTAINER_CLASS = "sc-65aa59f2-0" //BRITTLE! This class name can change
-const observerNewsItemContainer = new MutationObserver(processNewsItems);
+// const NEWS_ITEM_CONTAINER_CLASS = "sc-65aa59f2-0" //BRITTLE! This class name can change
+// const observerNewsItemContainer = new MutationObserver(processNewsItems);
 
-const newsItemContainer = document.getElementsByClassName(NEWS_ITEM_CONTAINER_CLASS)[0]
+// const newsItemContainer = document.getElementsByClassName(NEWS_ITEM_CONTAINER_CLASS)[0]
 
 //  observerNewsItemContainer.observe(newsItemContainer, { childList: true, subtree: true });
+
+
+const listenForOptionChanges = () => {
+  chrome.storage.onChanged.addListener((changes, namespace) => {
+    console.log(`listener in CONTENT>JS for storage changes has fired`)
+    let relevantChange = false
+    for (let [key, { oldValue, newValue }] of Object.entries(changes)) {
+      console.log(
+        `Storage key "${key}" in namespace "${namespace}" changed.`,
+        `Old value was "${oldValue}", new value is "${newValue}".`
+      );
+      if (key === 'highlightKeywords' || key === 'hideNumbers') {
+        extensionOptions[key] = newValue
+        relevantChange = true
+      }
+    }
+    if (relevantChange) processNewsItems()
+  });
+}
+
+listenForOptionChanges()
