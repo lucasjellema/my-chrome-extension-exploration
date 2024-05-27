@@ -12,7 +12,7 @@ The following mechanisms are at play:
 * the message is received in `background.js`. From it, a new message of type *linkInfo* is created and sent (to `side_panel.js`)
 * in `side_panel.js` - the message is received and its contents is rendered in the `DIV` element (a little clunky but effective)
 
-   
+![](images/extension-overview.png)   
 
 ## Install the Extension
 
