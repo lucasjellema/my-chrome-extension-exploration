@@ -25,6 +25,7 @@ const processNewsItems = async () => {
     const newsItemElement = newsItems[i]
     addButtonToNewsItem(newsItemElement)
     highlightItem(newsItemElement)
+    if (extensionOptions.hideNumbers)  hideNumbers(newsItemElement)
   }
 }
 
@@ -37,16 +38,30 @@ const highlightItem = (newsItemElement) => {
     if (!headingElement) return
     const headingText = headingElement.textContent
     // if heading text contains one of the keywords
-
     for (let i = 0; i < keywords.length; i++) {
       if (headingText.toLowerCase().includes(keywords[i])) {
         headingElement.style.backgroundColor = 'yellow'
       }
     }
-
   }
 }
 
+
+const hideNumbers = (newsItemElement) => {
+  const link = newsItemElement.getElementsByTagName('a')[0]
+  // link has two direct div children; first one contains image  , the second the heading  (h2) and body (p)
+  if (link) {
+    const headingElement = link.children[1].getElementsByTagName('h2')[0]
+    if (!headingElement) return
+    const headingText = headingElement.textContent
+    // replace every digit in heading text with *
+    headingElement.textContent = headingText.replace(/\d/g, '*')
+
+    const bodyElement = link.children[1].getElementsByTagName('p')[0]
+    const bodyText = bodyElement.textContent
+    bodyElement.textContent = bodyText.replace(/\d/g, '*')
+  }
+}
 
 const addButtonToNewsItem = (newsItemElement) => {
 
