@@ -1,14 +1,25 @@
-const fetchOptions = async (callforward) => {
-  console.log(`fetching options (from background)`);
-  (async () => {
-    const response = await chrome.runtime.sendMessage({ type: 'optionsRequest' });
-    // do something with response here, not outside the function
-    console.log(response);
-    console.log(`options: ${response.options}`, response.options)
-    Object.assign(extensionOptions, response.options);
+// it works  - but it is unnecessarily complex - asking background js for values from chrome.storage that content.js can access itself.
+// const fetchOptions = async (callforward) => {
+//   console.log(`fetching options (from background)`);
+//   (async () => {
+//     const response = await chrome.runtime.sendMessage({ type: 'optionsRequest' });
+//     // do something with response here, not outside the function
+//     console.log(response);
+//     console.log(`options: ${response.options}`, response.options)
+//     Object.assign(extensionOptions, response.options);
+//     callforward()
+//   })();
+// }
+
+const restoreOptions = (callforward) => {
+  chrome.storage.sync.get(['highlightKeywords', 'hideNumbers'], (items) => {
+    console.log(`background restore options`, items)
+    extensionOptions.highlightKeywords = items.highlightKeywords || ''
+    extensionOptions.hideNumbers = items.hideNumbers || ''
     callforward()
-  })();
+  });
 }
+
 
 const extensionOptions = {}
 const NEWS_ITEM_LI_CLASS = "sc-27eaedb2-0" //BRITTLE! This class name can change
@@ -80,6 +91,7 @@ const addButtonToNewsItem = (newsItemElement) => {
       const body = link.children[1].getElementsByTagName('p')[0].textContent
       const item = { heading, body, itemUrl: link.href }
       console.log(link, item)
+      // send news item to background
       chrome.runtime.sendMessage({ action: 'saveNewsItem', data: item });
     }
     console.log(`save news item `, newsItemElement)
@@ -88,7 +100,10 @@ const addButtonToNewsItem = (newsItemElement) => {
 }
 
 console.log(`content.js nos.nl extension loaded, go process news items`)
-fetchOptions(processNewsItems)
+//fetchOptions(processNewsItems) // no longer needed - content.js can access chrome.storage itself
+
+restoreOptions(processNewsItems)
+
 
 // if content changes of div with class sc-65aa59f2-0, then process newsItems again
 
