@@ -3,7 +3,7 @@ document.getElementById('scrape').addEventListener('click', () => {
       chrome.scripting.executeScript(
         {
           target: { tabId: tabs[0].id },
-          files: ["content2.js"]
+          files: ["content.js"]
         },
         () => {
           chrome.tabs.sendMessage(tabs[0].id, { action: 'scrapeLinks' });
