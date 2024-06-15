@@ -3,15 +3,12 @@ document.getElementById('scrape').addEventListener('click', () => {
       chrome.scripting.executeScript(
         {
           target: { tabId: tabs[0].id },
-          files: ["content.js"]
+          files: ["content2.js"]
+        },
+        () => {
+          chrome.tabs.sendMessage(tabs[0].id, { action: 'scrapeLinks' });
         }
       );
     });
-  });
-  
-  chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    if (message.action === 'scrapeLinks') {
-      chrome.runtime.sendMessage({ action: 'processLinks', links: message.links });
-    }
   });
   
