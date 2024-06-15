@@ -28,3 +28,18 @@ const inspectIfNewMail = () => {
 setTimeout(() => {
   inspectIfNewMail();
 }, 1000); // it takes some time for the document to be ready to be inspected (the bcc field to be set), hence this timeout
+
+
+function injectScript(file, node) {
+  var th = document.getElementsByTagName(node)[0];
+  var s = document.createElement('script');
+  s.setAttribute('type', 'text/javascript');
+  const fileUrl = chrome.runtime.getURL(file)
+  console.log(`injected script ${fileUrl}`)
+  s.setAttribute('src', fileUrl);
+  th.appendChild(s);
+  console.log('Outlook Extension Script has been injected: ' + file);
+}
+
+// Inject the script that defines the postMessageToIframe function
+injectScript('injected_script.js', 'body');
