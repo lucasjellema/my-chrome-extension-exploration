@@ -1,8 +1,12 @@
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  // console.log(`message received: ${message}`, message);
+  console.log(`message received: ${message}`, message);
   if (message.type === 'optionsRequest') {
     if (!options.loaded) restoreOptions();
     sendResponse({ status: 'success', options });
+  }
+  if (message.type === 'saveNewsItem') {
+    console.log(`News Item report received: ${message}`, message);
+    sendResponse({ status: 'success' });
   }
 });
 

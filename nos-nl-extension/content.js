@@ -1,16 +1,3 @@
-// it works  - but it is unnecessarily complex - asking background js for values from chrome.storage that content.js can access itself.
-// const fetchOptions = async (callforward) => {
-//   console.log(`fetching options (from background)`);
-//   (async () => {
-//     const response = await chrome.runtime.sendMessage({ type: 'optionsRequest' });
-//     // do something with response here, not outside the function
-//     console.log(response);
-//     console.log(`options: ${response.options}`, response.options)
-//     Object.assign(extensionOptions, response.options);
-//     callforward()
-//   })();
-// }
-
 const restoreOptions = (callforward) => {
   chrome.storage.sync.get(['highlightKeywords', 'hideNumbers'], (items) => {
     console.log(`background restore options`, items)
@@ -20,10 +7,8 @@ const restoreOptions = (callforward) => {
   });
 }
 
-
 const extensionOptions = {}
 const NEWS_ITEM_LI_CLASS = "sc-27eaedb2-0" //BRITTLE! This class name can change
-
 
 const processNewsItems = async () => {
   console.log(`processNewsItems`, extensionOptions)
@@ -92,7 +77,7 @@ const addButtonToNewsItem = (newsItemElement) => {
       const item = { heading, body, itemUrl: link.href }
       console.log(link, item)
       // send news item to background
-      chrome.runtime.sendMessage({ action: 'saveNewsItem', data: item });
+      chrome.runtime.sendMessage({ type: 'saveNewsItem', data: item });
     }
     console.log(`save news item `, newsItemElement)
   };
