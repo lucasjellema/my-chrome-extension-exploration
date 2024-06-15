@@ -1,0 +1,10 @@
+{
+  "manifest_version": 3,
+  "name": "Time Panel",
+  "version": "1.0",
+  "description": "This extension displays a side panel with the current time",
+  "permissions": ["sidePanel"],
+  "side_panel": {
+    "default_path": "side_panel.html"
+  }
+}
