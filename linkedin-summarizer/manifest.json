@@ -6,7 +6,7 @@
   "permissions": [
     "contextMenus",
     "activeTab",  "sidePanel",
-    "scripting", "storage"
+    "scripting", "storage", "fileSystem"
   ],
   "background": {
     "service_worker": "background.js"
