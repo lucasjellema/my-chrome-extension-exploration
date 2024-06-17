@@ -44,6 +44,9 @@ This code will add a `button` element in the `body` of the page loaded in the ac
 
 To add this extension in your browser, start Google Chrome. Type in the address bar: `chrome://extensions`. 
 
+Enable Developer Mode:
+![](images/enable-dev-mode.png)
+
 Click on the button *Load unpacked*.
 ![](images/load-unpacked.png)
 
@@ -55,6 +58,18 @@ The extension will be added to your browser:
 Now open any web page - for example a LinkedIn page, nu.nl, Google.com or Outlook Web Client.   
 
 ![](images/mybigfatbutton.png)
+
+### Microsoft Edge Browser
+
+Extensions developed for Google Chrome are essentially developed for the Chromium browser. And Edge too is a Chromium browser. Therefore, your Chrome Extensions are by definition also Edge Extensions, and you can activate them in similar steps:
+
+Enable developmer mode, click *Load unpacked*, select the folder that contains the `manifest.json` file:
+![](images/mybigfatbutton-extension-in-edge.png)
+When you open a website in your Edge browser, you will get the same button decoration you saw earlier in Chrome:
+![](images/extension-in-action-in-edge.png)
+
+
+
 
 ## Extension #2 - Side Panel with the current time
 
