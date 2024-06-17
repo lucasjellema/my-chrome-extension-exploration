@@ -33,6 +33,8 @@ Add the following content to this file:
 
 This is the configuration of a new extension. It is called *Add button extension*. It needs permission to access the *activeTab* and to execute *scripting*. It executes the code in the file `content.js`, and it will execute for every page (every url).
 
+![](images/digaram-add-button.png)
+
 Next, create the file `content.js` in the same folder. Add the following content to this file:
 ```
 const body = document.querySelector("body");
@@ -130,6 +132,45 @@ This extension is added. To the side panel, you need to explicitly open it.
 Once the side panel is activated like this, it will display :
 ![](images/timepanel.png)
 
+## Extension 3 - Add Context Menu Option for Links - Show Link Details in Side Panel
+
+This next extension adds an item to the context menu that the browser shows when a link (<a> element) is right or context clicked. This item - *Get Link Info* - triggers logic to locate the link element in the current page, read some of its properties and display those properties in the side panel. 
+![](images/get-link-info.png)
+
+While the functionality described may not sound like much, the back and forth interaction between the menu item, the service worker (background script), the content script and the side panel is useful to understand. These components can only have message based, asynchronous communication, that you need to understand in order to attempt more complex extensions. The diagram of the components and their interaction looks like this:
+![](images/link-info-diagram.png)
+
+
+You will find a detailed description of this extension in [this document](https://github.com/lucasjellema/my-chrome-extension-exploration/tree/main/context-menu-clipboard).
+
+## Extension 4 - News Site Manipulator
+
+This extension is targeted specifically at the news site [nos.nl](https://nos.nl/). The extension does three things:
+* it highlights all news items that contain user defined keywords
+* it adds a button to every news items to have its details saved 
+* it replaces all numbers with * (this to not immediately give away the football results) 
+
+A visualization of the effect of the extension is shown here:
+![](images/nosnl-extension-in-action.png)
+
+
+
+## Other Custom Chrome Extensions
+
+Two additional extensions were prepared for this workshop. Not discussed to the same level of detail. However, the sources are available to inspect.
+
+* [LinkedIn Summarizer](https://github.com/lucasjellema/my-chrome-extension-exploration/tree/main/linkedin-summarizer) - add a button to a LinkedIn profile page that when pressed creates a JSON summary of the profile details, presented in the side panel
+* [Link Crawler](https://github.com/lucasjellema/my-chrome-extension-exploration/tree/main/crawler) - crawl all pages linked from the current page and present a list of all titles of those pages (two different implementations of this extension are provided) - one using a hidden IFRAME and [an alternative one using a Browser Tab](https://github.com/lucasjellema/my-chrome-extension-exploration/tree/main/crawler-2) to visit all linked pages (to cater for sites that do not like being loaded in an IFRAME).  
+
+Of course there are many extensions available for the Chrome Browser. It is important to realize that you can install these extensions, not enable them (immediately) and inspect there sources. To know what exactly they will do - before you allow them to run inside your browser. And to learn from their implementation.
+
+When you checked the installed extensions in your browser, you will find an extension id:
+![](images/extension-id.png)
+That id value corresponds with a directory name on your local disk. In that directory, you will find the source files for the extension. You will find a manifest.json and a subset of the files we have seen in this document - popup, options, background, content, sidepanel.
+
+The directory to check for the extensions is: `C:\Users\<user>\AppData\Local\Google\Chrome\User Data\Default\Extensions`
+
+![](images/local-extensions-directory.png)
 
 
 ## Resources
