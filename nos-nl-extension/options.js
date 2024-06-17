@@ -11,8 +11,6 @@ function saveOptions() {
         // Update status to let user know options were saved.
         alert('Options saved.');
     });
-
-
 }
 
 // Restore options from chrome.storage

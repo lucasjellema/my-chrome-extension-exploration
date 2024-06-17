@@ -1,6 +1,5 @@
 const restoreOptions = (callforward) => {
   chrome.storage.sync.get(['highlightKeywords', 'hideNumbers'], (items) => {
-    console.log(`background restore options`, items)
     extensionOptions.highlightKeywords = items.highlightKeywords || ''
     extensionOptions.hideNumbers = items.hideNumbers || ''
     callforward()
@@ -11,12 +10,9 @@ const extensionOptions = {}
 const NEWS_ITEM_LI_CLASS = "sc-27eaedb2-0" //BRITTLE! This class name can change
 
 const processNewsItems = async () => {
-  console.log(`processNewsItems`, extensionOptions)
   const newsItems = document.getElementsByClassName(NEWS_ITEM_LI_CLASS)
-  console.log(`Found ${newsItems.length} news items`)
 
   // highlight all items with one of the keywords in the title
-  console.log(`extensionOptions.highlightKeywords`, extensionOptions.highlightKeywords)
   for (let i = 0; i < newsItems.length; i++) {
     const newsItemElement = newsItems[i]
     addButtonToNewsItem(newsItemElement)
@@ -79,25 +75,13 @@ const addButtonToNewsItem = (newsItemElement) => {
       // send news item to background
       chrome.runtime.sendMessage({ type: 'saveNewsItem', data: item });
     }
-    console.log(`save news item `, newsItemElement)
   };
   newsItemElement.appendChild(button);
 }
 
 console.log(`content.js nos.nl extension loaded, go process news items`)
-//fetchOptions(processNewsItems) // no longer needed - content.js can access chrome.storage itself
 
 restoreOptions(processNewsItems)
-
-
-// if content changes of div with class sc-65aa59f2-0, then process newsItems again
-
-// const NEWS_ITEM_CONTAINER_CLASS = "sc-65aa59f2-0" //BRITTLE! This class name can change
-// const observerNewsItemContainer = new MutationObserver(processNewsItems);
-
-// const newsItemContainer = document.getElementsByClassName(NEWS_ITEM_CONTAINER_CLASS)[0]
-
-//  observerNewsItemContainer.observe(newsItemContainer, { childList: true, subtree: true });
 
 
 const listenForOptionChanges = () => {
