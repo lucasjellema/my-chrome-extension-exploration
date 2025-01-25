@@ -25,3 +25,149 @@ Edges can be removed (from the context menu on the edge)
 Nodes can be filtered by label prefix. Nodes whose label fit with the filter are shown as well as edges between these nodes. Depending on the checkbox, all nodes referenced from these nodes are shown as well including the edged between all nodes. 
 
 When a link is selected in the current web page and the option Add Link to Network Navigator is selected in the browser context menu, a node is added in the graph for both the current page and the referenced page with an edge between the two.
+
+Todo:
+* support for multiple graphs that can coexist and between which the user can toggle; potentially merge graphs, duplicate graphs; graphs have a name, perhaps tags, description, creation / lst modified date
+* download / upload graph data to/from JSON file
+* filter nodes/edges on type / label / date
+* show image/icon in a node 
+* do not show tooltip when context menu is open
+* assign GUID as id for new nodes
+* edit node properties
+* edit edge properties 
+
+* LinkedIn addin - publishes
+  * name
+  * image (url)
+  * about/description
+  * company (role, from, until)
+  * location (country, area)
+  * university
+  * contacts - referenced people 
+
+* Wikipedia addin for people (for example https://en.wikipedia.org/wiki/Steve_Jobs) - publishes
+  * name
+  * image (url)
+  * about/description
+  * company (role, from, until)
+  * location of birth (country, area)
+  * location of death (country, area)
+  * university
+  * contacts - referenced people 
+  * birth date, death date
+* 
+* Wikipedia addin for technology (for example https://en.wikipedia.org/wiki/Adobe_InDesign) - publishes
+  * name
+  * logo
+  * initial release year
+  * type/tags
+  * license
+  * website
+  * company/developers
+  * related technology 
+  * latest release (year, label)
+
+
+
+## Useful information
+
+### Node Shapes
+nodes can have different shapes
+
+in the style used for creating nodes:
+```
+style: [
+          {
+            selector: 'node',
+            style: {
+              'background-color': '#0074D9',
+              label: 'data(label)',
+              'text-valign': 'center',
+              'text-halign': 'center',
+              'color': '#fff',
+              shape: 'data(shape)', // Shape comes from node data
+            },
+          },
+```
+the shape property can be set using a property in the object the node is based on. 
+Each node’s shape is defined by its data.shape property.
+The style shape: 'data(shape)' dynamically assigns shapes based on node data.
+Values are:
+
+ellipse (default)
+triangle
+rectangle
+round-rectangle
+bottom-round-rectangle
+cut-rectangle
+barrel
+diamond
+pentagon
+hexagon
+concave-hexagon
+heptagon
+octagon
+star
+tag
+vee
+
+If you need more control or custom shapes not provided by Cytoscape, you can create them using custom SVG or HTML elements with extensions like cytoscape-node-html-label.
+
+
+### images in nodes 
+Cytoscape.js supports displaying images inside nodes. You can use the background-image style property to set an image for a node. This is particularly useful for customizing nodes with logos, icons, or any other graphical representation.
+
+```
+elements: [
+          { data: { id: 'node1', label: 'Node 1', image: 'https://via.placeholder.com/100' }, position: { x: 100, y: 100 } },
+          { data: { id: 'node2', label: 'Node 2', image: 'https://via.placeholder.com/100/ff0000' }, position: { x: 200, y: 200 } },
+          { data: { id: 'node3', label: 'Node 3', image: 'https://via.placeholder.com/100/00ff00' }, position: { x: 300, y: 100 } },
+          { data: { source: 'node1', target: 'node2' } },
+          { data: { source: 'node2', target: 'node3' } },
+        ],
+        style: [
+          {
+            selector: 'node',
+            style: {
+              'background-image': 'data(image)', // Use image from node data
+              'background-fit': 'cover',        // Fit the image to the node size
+              'background-opacity': 1,          // Ensure the image is fully visible
+              'border-color': '#0074D9',
+              'border-width': 2,
+              'border-opacity': 1,
+              label: 'data(label)',
+              'text-valign': 'bottom',          // Place the text below the node
+              'text-halign': 'center',
+              'color': '#333',
+              'font-size': 12,
+              'background-color': '#eee',       // Background color for nodes without images
+              width: 80,                        // Node width
+              height: 80,                       // Node height
+            },
+          },
+          {...
+```          
+Setting the Image:
+
+The background-image style property is set to data(image), which dynamically assigns images based on the image attribute of the node's data.
+Styling:
+
+background-fit: 'cover': Ensures the image covers the entire node area.
+background-opacity: 1: Makes the background image fully visible.
+Width and height of the node (width and height) define the size of the image.
+Fallback for Nodes Without Images:
+
+A background-color is specified to handle nodes that do not have an image.
+
+Circular or Square Nodes: Adjust the shape property (e.g., ellipse or rectangle) for circular or square nodes.
+
+Multiple Images: Use background-image-crossfade and background-image-opacity to overlay multiple images.
+
+Image Positioning: Customize the positioning with:
+
+javascript
+Copy
+Edit
+'background-position-x': '50%',
+'background-position-y': '50%',
+'background-clip': 'none',

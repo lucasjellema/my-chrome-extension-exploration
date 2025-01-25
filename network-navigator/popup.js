@@ -1,3 +1,5 @@
+import { generateGUID } from './utils.js';
+import { getSavedGraphs, saveGraph, getGraphById } from './utils.js';
 const links = [
     { url: "https://example.com", label: "Example" },
     { url: "https://google.com", label: "Google" },
@@ -8,6 +10,8 @@ let editMode = false
 let hoverTimeout = null; // Track the timeout for hover
 let sourceNode = null; // Track the source node for edge creation
 let selectedEdge = null;
+let selectedNode = null;
+let changed = false;
 
 const STORAGE_KEY = 'cytoscape-graph'; // LocalStorage key for the graph data
 
@@ -25,23 +29,39 @@ document.addEventListener("DOMContentLoaded", () => {
     const tooltip = document.getElementById("node-tooltip");
     const contextMenu = document.getElementById('context-menu');
     const edgeContextMenu = document.getElementById('edge-context-menu');
+    const nodeContextMenu = document.getElementById('node-context-menu');
+
     const deleteButton = document.getElementById('delete-edge');
     const addNodeButton = document.getElementById('add-node');
+    const createGraphButton = document.getElementById('create-new-graph');
+    const viewGraphsButton = document.getElementById('view-saved-graphs');
     let clickedPosition = null;
 
     edgeContextMenu.addEventListener('contextmenu', (event) => { // do not show a context menu on the context menu
+        event.preventDefault();
+    }); nodeContextMenu.addEventListener('contextmenu', (event) => { // do not show a context menu on the context menu
         event.preventDefault();
     });
     contextMenu.addEventListener('contextmenu', (event) => { // do not show a context menu on the context menu
         event.preventDefault();
     });
 
+    // Save graph button
+    document.getElementById('save-graph').addEventListener('click', () => {
+        saveCurrentGraph(cy);
+    });
+
+
+
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         if (message.type === 'linkInfo') {
             console.log("Received linkInfoForNetwork message:", message);
             addLink({
-                url: message.href,
-                label: message.linkText
+                targetUrl: message.href,
+                targetLabel: message.linkText,
+                sourceUrl: message.sourceUrl,
+                sourceTitle: message.title
+
             })
 
             const contentDiv = document.getElementById('content');
@@ -59,12 +79,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     //add click listener to edit button
     document.getElementById("editModeToggler").addEventListener("click", toggleEditMode);
-
+    let currentGraphId = localStorage.getItem('currentGraphId');
+    const existingGraph = getGraphById(currentGraphId);
+    setTitle(existingGraph?.title);
     // Initialize Cytoscape
     const cy = cytoscape({
         container: document.getElementById("cy"), // Reference to the container div
 
-        elements: loadGraph()
+        elements: existingGraph?.elements
 
         ,
 
@@ -113,9 +135,23 @@ document.addEventListener("DOMContentLoaded", () => {
         ],
 
         layout: {
-            name: "circle",
+            name: "grid",
         },
     });
+
+    // Track current graph ID
+
+    if (!currentGraphId) {
+        createNewGraph(cy)
+    } else {
+        // Load existing graph if available
+        const existingGraph = getGraphById(currentGraphId);
+        if (existingGraph) {
+            cy.add(existingGraph.elements);
+            document.getElementById('graph-title').value = existingGraph.title;
+            document.getElementById('graph-description').value = existingGraph.description;
+        }
+    }
 
     // Prevent the browser's default context menu
     cy.container().addEventListener('contextmenu', (event) => {
@@ -165,6 +201,8 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             // Hide the context menu for a click outside of it
             edgeContextMenu.style.display = 'none'; // Hide menu
+            selectedNode = null; // Clear selection
+            nodeContextMenu.style.display = 'none'; // Hide menu
             selectedEdge = null; // Clear selection
             contextMenu.style.display = 'none';
             clickedPosition = null;
@@ -173,6 +211,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // Show tooltip on mouseover
+    // TODO do not show tooltip when context menu is open
     cy.on("mouseover", "node", (event) => {
         hoverTimeout = setTimeout(() => {
             const node = event.target;
@@ -186,8 +225,8 @@ document.addEventListener("DOMContentLoaded", () => {
           `;
 
             // Position the tooltip near the mouse pointer
-            tooltip.style.left = `${event.renderedPosition.x + 10}px`;
-            tooltip.style.top = `${event.renderedPosition.y + 10}px`;
+            tooltip.style.left = `${event.renderedPosition.x + 15}px`;
+            tooltip.style.top = `${event.renderedPosition.y + 15}px`;
             tooltip.style.display = "block";
         }, 500)
     });
@@ -223,10 +262,11 @@ document.addEventListener("DOMContentLoaded", () => {
     // Add a new red node
     addNodeButton.addEventListener('click', () => {
         if (clickedPosition) {
-            const newNodeId = `node${cy.nodes().length + 1}`;
+            const newNodeId = generateGUID();
+
             cy.add({
                 group: 'nodes',
-                data: { id: newNodeId, label: `Node ${cy.nodes().length + 1}` },
+                data: { id: newNodeId, label: `New Node` },
                 position: clickedPosition,
                 classes: 'red-node', // Add the red-node class for styling
             });
@@ -238,6 +278,67 @@ document.addEventListener("DOMContentLoaded", () => {
             contextMenu.style.display = 'none';
             clickedPosition = null;
         }
+    });
+
+    createGraphButton.addEventListener('click', () => {
+        createNewGraph(cy);
+        contextMenu.style.display = 'none';
+    });
+
+    viewGraphsButton.addEventListener('click', () => {
+        const savedGraphs = getSavedGraphs();
+        const graphList = savedGraphs
+            .map((graph) => `<div class="graph-item" data-id="${graph.id}">${graph.title}</div>`)
+            .join('');
+
+        const graphListModal = document.createElement('div');
+        graphListModal.id = 'graph-list-modal';
+        graphListModal.innerHTML = `
+          <div style="background: white; padding: 20px; border: 1px solid #ccc;">
+            <h3>Saved Graphs</h3>
+            ${graphList || '<p>No graphs saved.</p>'}
+            <button id="close-modal">Close</button>
+          </div>
+        `;
+        document.body.appendChild(graphListModal);
+
+        // Handle graph selection
+        document.querySelectorAll('.graph-item').forEach((item) => {
+            item.addEventListener('click', (event) => {
+                const graphId = event.target.getAttribute('data-id');
+                const selectedGraph = getGraphById(graphId);
+                if (selectedGraph) {
+                    localStorage.setItem('currentGraphId', graphId);
+                    cy.elements().remove();
+                    cy.add(selectedGraph.elements); // Load graph elements
+                    // Reapply the layout to organize the graph
+                    cy.layout({ name: 'grid' }).run();
+
+                    document.getElementById("graph-title").value = selectedGraph.title;
+                    document.getElementById("graph-description").value = selectedGraph.description;
+                    setTitle(selectedGraph.title);
+                }
+                graphListModal.remove();
+            });
+        });
+
+        // Close modal
+        document.getElementById('close-modal').addEventListener('click', () => {
+            graphListModal.remove();
+        });
+
+        contextMenu.style.display = 'none';
+    });
+
+    cy.on('cxttap', 'node', (event) => {
+        event.originalEvent.preventDefault(); // Prevent default browser context menu
+        selectedNode = event.target; // Get the clicked node
+
+        // Position the context menu near the mouse pointer
+        const { clientX, clientY } = event.originalEvent;
+        nodeContextMenu.style.left = `${clientX}px`;
+        nodeContextMenu.style.top = `${clientY}px`;
+        nodeContextMenu.style.display = 'block';
     });
 
     // Show context menu on edge right-click
@@ -262,6 +363,15 @@ document.addEventListener("DOMContentLoaded", () => {
         selectedEdge = null; // Clear selection
     });
 
+
+    // Handle context menu item click
+    document.getElementById('delete-node').addEventListener('click', () => {
+        if (selectedNode) {
+            selectedNode.remove(); // Remove the node and its connected edges
+            nodeContextMenu.style.display = 'none'; // Hide the context menu
+            selectedNode = null; // Clear the selected node
+        }
+    });
 
     const filterInput = document.getElementById('filter-input');
     const applyFilterButton = document.getElementById('apply-filter');
@@ -320,14 +430,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
 
-
-
-    // Save the graph to localStorage
-    function saveGraph() {
-        const graphData = cy.json(); // Get the current graph state
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(graphData));
-    }
-
     // Load the graph from localStorage
     function loadGraph() {
         const savedGraph = localStorage.getItem(STORAGE_KEY);
@@ -335,48 +437,37 @@ document.addEventListener("DOMContentLoaded", () => {
             return JSON.parse(savedGraph).elements; // Load the saved elements
         }
         // Default graph elements if nothing is saved
+        const id = generateGUID();
+
         return [
             // Add a central node representing the current page
-            { data: { id: "current", label: "Current Page" } },
+
+            { data: { id: id, label: "Current Page" } },
 
             // Add nodes and edges for each outgoing link
             ...links.map((link, index) => ({
                 data: { id: `node-${index}`, label: link.label, href: link.url },
             })),
             ...links.map((link, index) => ({
-                data: { source: "current", target: `node-${index}`, label: link.label },
+                data: { source: id, target: `node-${index}`, label: link.label },
             })),
         ];
     }
 
-    function reloadGraph() {
-        const savedGraph = localStorage.getItem(STORAGE_KEY);
-        if (savedGraph) {
-            const graphData = JSON.parse(savedGraph).elements;
-
-            // Clear existing elements
-            cy.elements().remove();
-
-            // Add new elements
-            cy.add(graphData);
-
-            // Reapply layout
-            cy.layout({ name: 'grid' }).run();
-
-
-        } else {
-            alert('No graph data found in localStorage!');
-        }
-    }
-
-    // Save graph on button click
-    document.getElementById('save-graph').addEventListener('click', saveGraph);
-    document.getElementById('reload-graph').addEventListener('click', reloadGraph);
 
     // Automatically save graph on changes
     cy.on('add remove data', () => {
-        saveGraph(); // Persist graph automatically on every modification
+        changed = true
+//        saveCurrentGraph(cy)
     });
+
+  // create peiodic timeout to save the graph if there are changes
+    setInterval(() => {
+        if (changed) {
+            changed = false
+            saveCurrentGraph(cy);            
+        }
+    }, 5000); // check every 5 seconds for a change
 
     // Clear localStorage
     document.getElementById('clear-storage').addEventListener('click', () => {
@@ -385,35 +476,77 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
 
+
+    const findNodeId = (property, value) => {
+        const currentNodes = cy.nodes().filter((node) => node.data(property) === value);
+        return currentNodes[0]?.id();
+    };
+
+
+
+
     /**
-     * Adds a new link to the graph visualization.
-     * 
-     * This function takes a link object containing a URL and a label, 
-     * adds it to the existing list of links, and incorporates the new link 
-     * into the Cytoscape graph as a node. An edge is also created from the 
-     * central "current" node to the new node representing the link. 
-     * The graph layout is then reapplied to organize the nodes.
-     * 
-     * @param {Object} link - The link object to add.
-     * @param {string} link.url - The URL of the link.
-     * @param {string} link.label - The label for the link.
+     * Add a link to the graph. If the source or target do not yet exist in the graph, they will be created.
+     * @param {Object} link - an object with properties targetUrl, targetLabel, sourceUrl, sourceTitle
+     * @example
+     * addLink({
+     *     targetUrl: 'https://example.com',
+     *     targetLabel: 'Example',
+     *     sourceUrl: 'https://google.com',
+     *     sourceTitle: 'Google',
+     * });
      */
-
     const addLink = (link) => {
+        const { targetUrl, targetLabel, sourceUrl, sourceTitle } = link;
+        let sourceNodeId = findNodeId('href', sourceUrl);
+        if (!sourceNodeId) {
+            sourceNodeId = generateGUID();
+            cy.add({
+                data: { id: sourceNodeId, href: sourceUrl, label: sourceTitle, type: 'webpage' },
+            });
+        }
 
-        const { url, label } = link;
-        links.push({ url, label });
+        let targetNodeId = findNodeId('href', targetUrl);
+        if (!targetNodeId) {
+            targetNodeId = generateGUID();
+            cy.add({
+                data: { id: targetNodeId, href: targetUrl, label: targetLabel, type: 'webpage' },
+            });
+        }
+        // add link
         cy.add({
-            data: { id: `node-${links.length - 1}`, label, href: url },
-        });
-        cy.add({
-            data: { source: "current", target: `node-${links.length - 1}`, label: label },
+            data: { source: sourceNodeId, target: targetNodeId, label: targetLabel, type: 'weblink' },
         });
         // Reapply the layout to organize the graph
-        cy.layout({ name: 'circle' }).run();
+        cy.layout({ name: 'grid' }).run();
 
     };
 
 
 });
 
+function createNewGraph(cy) {
+    console.log('creating new graph');
+    const newId = generateGUID();
+    localStorage.setItem('currentGraphId', newId); // Track the new graph ID
+    console.log("new id and remove");
+    cy.elements().remove(); // Clear the existing graph
+    document.getElementById('graph-title').value = "New Graph";
+    document.getElementById('graph-description').value = '';
+    console.log("save new graph");
+    setTitle('New Graph');
+    saveCurrentGraph(cy);
+
+}
+
+function saveCurrentGraph(cy) {
+    const currentGraphId = localStorage.getItem('currentGraphId');
+    const title = document.getElementById('graph-title').value;
+    const description = document.getElementById('graph-description').value;
+    const elements = cy.json().elements;
+    saveGraph(currentGraphId, title, description, elements);
+}
+
+const setTitle = (title) => {
+    document.getElementById('graphTitle').textContent = title;
+}
