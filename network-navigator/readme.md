@@ -27,14 +27,13 @@ Nodes can be filtered by label prefix. Nodes whose label fit with the filter are
 When a link is selected in the current web page and the option Add Link to Network Navigator is selected in the browser context menu, a node is added in the graph for both the current page and the referenced page with an edge between the two.
 
 Todo:
-* support for multiple graphs that can coexist and between which the user can toggle; potentially merge graphs, duplicate graphs; graphs have a name, perhaps tags, description, creation / lst modified date
 * download / upload graph data to/from JSON file
 * filter nodes/edges on type / label / date
 * show image/icon in a node 
 * do not show tooltip when context menu is open
-* assign GUID as id for new nodes
 * edit node properties
 * edit edge properties 
+* merge nodes (and have all edges connect to merge result)
 
 * LinkedIn addin - publishes
   * name

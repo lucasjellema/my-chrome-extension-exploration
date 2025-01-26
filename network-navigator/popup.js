@@ -285,14 +285,14 @@ document.addEventListener("DOMContentLoaded", () => {
         contextMenu.style.display = 'none';
     });
 
-    viewGraphsButton.addEventListener('click', () => {
+    viewGraphsButton.addEventListener('click', (event) => {
+        contextMenu.style.display = 'none';
         const savedGraphs = getSavedGraphs();
         const graphList = savedGraphs
-            .map((graph) => `<div class="graph-item" data-id="${graph.id}">${graph.title}</div>`)
+            .map((graph) => `<div class="graph-item" data-id="${graph.id}">${graph.title} - ${graph.description}</div>`)
             .join('');
 
-        const graphListModal = document.createElement('div');
-        graphListModal.id = 'graph-list-modal';
+        const graphListModal = document.getElementById('graphs-overview');
         graphListModal.innerHTML = `
           <div style="background: white; padding: 20px; border: 1px solid #ccc;">
             <h3>Saved Graphs</h3>
@@ -300,8 +300,9 @@ document.addEventListener("DOMContentLoaded", () => {
             <button id="close-modal">Close</button>
           </div>
         `;
-        document.body.appendChild(graphListModal);
-
+        graphListModal.style.left = `${event.x + 15}px`;
+        graphListModal.style.top = `${event.y + 15}px`;
+        graphListModal.style.display = "block";
         // Handle graph selection
         document.querySelectorAll('.graph-item').forEach((item) => {
             item.addEventListener('click', (event) => {
@@ -318,16 +319,16 @@ document.addEventListener("DOMContentLoaded", () => {
                     document.getElementById("graph-description").value = selectedGraph.description;
                     setTitle(selectedGraph.title);
                 }
-                graphListModal.remove();
+                graphListModal.style.display = 'none';
             });
         });
 
         // Close modal
         document.getElementById('close-modal').addEventListener('click', () => {
-            graphListModal.remove();
+            graphListModal.style.display = 'none';
         });
 
-        contextMenu.style.display = 'none';
+       
     });
 
     cy.on('cxttap', 'node', (event) => {
