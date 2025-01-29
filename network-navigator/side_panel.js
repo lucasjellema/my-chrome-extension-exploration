@@ -14,6 +14,15 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 });
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+
+  if (message.type === 'linkedInPersonProfile') {
+    const contentDiv = document.getElementById('content');
+    contentDiv.textContent = `
+        Profile: ${JSON.stringify(message.profile)}
+        LinkedIn URL: ${message.linkedInUrl}
+      `;
+  }
+
   if (message.type === 'linkInfo') {
     console.log("Received linkInfoForNetwork message:", message);
     addLink({
