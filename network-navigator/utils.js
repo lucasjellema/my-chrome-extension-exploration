@@ -1,4 +1,8 @@
-const STORAGE_KEY = 'networknavigator-cytoscape-graphs';   // LocalStorage key for the graph data
+import { setTitle } from './ui.js';
+
+
+const STORAGE_KEY = 'network-navigator-graphs';   // LocalStorage key for the graph data
+const CURRENT_GRAPH_ID = 'currentGraphId'        // LocalStorage key for the current graph ID
 // 
 export function generateGUID() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
@@ -6,6 +10,11 @@ export function generateGUID() {
         const v = c === 'x' ? r : (r & 0x3) | 0x8;
         return v.toString(16);
     });
+}
+
+export const getCurrentGraph = () => {
+    const currentGraphId = localStorage.getItem(CURRENT_GRAPH_ID);
+    return getGraphById(currentGraphId) || null;
 }
 
 // Get all saved graphs from local storage
@@ -19,7 +28,7 @@ export function saveGraph(id, title, description, elements) {
     const graphs = getSavedGraphs();
     const graphIndex = graphs.findIndex((graph) => graph.id === id);
 
-    const newGraph = { id, title, description, elements };
+    const newGraph = { id, title, description, elements, timestamp: Date.now() };
 
     if (graphIndex > -1) {
         graphs[graphIndex] = newGraph; // Update existing graph
@@ -35,3 +44,65 @@ export function getGraphById(id) {
     const graphs = getSavedGraphs();
     return graphs.find((graph) => graph.id === id) || null;
 }
+
+export function saveCurrentGraph(cy) {
+    const currentGraphId = localStorage.getItem(CURRENT_GRAPH_ID);
+    const title = document.getElementById('graph-title').value;
+    const description = document.getElementById('graph-description').value;
+    const elements = cy.json().elements;
+    saveGraph(currentGraphId, title, description, elements);
+}
+
+export const getSelectedNodes = (cy) => {
+    const selectedElements = cy.$(':selected');
+    const selectedNodes = selectedElements.filter('node');
+
+    // console.log('Selected Nodes:', selectedNodes.map((node) => node.id()));
+    return selectedNodes;
+}
+
+export const createEdge = (cy, sourceNode, targetNode) => {
+    const newEdgeId = generateGUID();
+    cy.add({
+        data: {
+            id: newEdgeId,
+            source: sourceNode.id(),
+            target: targetNode.id(),
+            label: `Edge: ${sourceNode.data('label')} →  ${targetNode.data('label')}`,
+            timeOfCreation: Date.now(),
+        },
+    });
+    const newEdge = cy.getElementById(newEdgeId)
+    return newEdge 
+}
+export const createNode = (cy, label,) => {
+    const newNodeId = generateGUID();
+    const node =
+    {
+        group: 'nodes',
+        data: {
+            id: newNodeId, label: label, timeOfCreation: Date.now(),
+        }
+    }
+    cy.add(node);
+    const newNode = cy.getElementById(newNodeId)
+    return newNode
+}
+
+export const loadGraph = (cy, graph) => {
+    if (!graph) return;
+    localStorage.setItem('currentGraphId', graph.id);
+    cy.elements().remove();
+    cy.add(graph.elements); // Load graph elements
+    // Reapply the layout to organize the graph
+    //    cy.layout({ name: 'grid' }).run();
+
+    document.getElementById("graph-title").value = graph.title;
+    document.getElementById("graph-description").value = graph.description;
+    setTitle(graph.title);
+}
+
+export const findNodeByProperty = (cy,property, value) => {
+    const currentNodes = cy.nodes().filter((node) => node.data(property) === value);
+    return currentNodes[0] || null;
+};
