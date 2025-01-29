@@ -1,26 +1,35 @@
 import { createEdge, createNode, findNodeByProperty } from './utils.js';
 
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.type === 'linkInfo') {
-    const contentDiv = document.getElementById('content');
-    contentDiv.textContent = `
-        Link Text: ${message.linkText}
-        Title: ${message.title}
-        Source URL: ${message.sourceUrl}
-        Link Href: ${message.href}
-        Element ID: ${message.id}
-      `;
-  }
-});
+// chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+//   if (message.type === 'linkInfo') {
+//     const contentDiv = document.getElementById('content');
+//     contentDiv.textContent = `
+//         Link Text: ${message.linkText}
+//         Title: ${message.title}
+//         Source URL: ${message.sourceUrl}
+//         Link Href: ${message.href}
+//         Element ID: ${message.id}
+//       `;
+//   }
+// });
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
   if (message.type === 'linkedInPersonProfile') {
+
     const contentDiv = document.getElementById('content');
     contentDiv.textContent = `
         Profile: ${JSON.stringify(message.profile)}
         LinkedIn URL: ${message.linkedInUrl}
       `;
+
+    const profile = message.profile
+    const newNode = createNode(cy, profile.name);
+    newNode.data('url', message.linkedInUrl);
+    newNode.data('type', 'person');
+    newNode.data('subtype', 'linkedInContact');
+    newNode.data('image', profile.image);
+
   }
 
   if (message.type === 'linkInfo') {
