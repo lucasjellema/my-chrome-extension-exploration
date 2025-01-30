@@ -98,7 +98,16 @@ const addCurrentCompany = (profile) => {
     if (!element) return
     const company = element.textContent.replace(/\n/g, '').trim()
     profile.currentCompany = company
-  } catch (error) {
+
+    const button = document.querySelector('button[aria-label^="Current company:"]');
+    const companyLogo = button.querySelector('img');
+    if (companyLogo) {
+      console.log("Company logo found:", companyLogo.src);
+      const imageUrl = companyLogo.src;
+      profile.currentCompanyLogo = imageUrl
+    }
+  }
+  catch (error) {
 
   }
 }
@@ -115,49 +124,110 @@ const addAbout = (profile) => {
 }
 
 
+const findFirstElementUnderAncestor = (ancestor, selector) => {
+  while (ancestor) {
+    const ul = ancestor.querySelector(selector); // Depth-first search for UL within the ancestor
+    if (ul) {
+      console.log("Element found:", ul);
+      return ul;
+    }
+    ancestor = ancestor.parentElement; // Move up the tree
+  }
+  return null;
+}
+
+const findDirectChildren = (parentElement, childElementType, maxChildren = -1) => {
+  const divs = parentElement.querySelectorAll(`:scope > ${childElementType}`); // Selects only direct children
+  if (divs.length > 0) {
+    const max = maxChildren == -1 ? 9999 : maxChildren
+    return divs.slice(0, max);
+  }
+  else {
+    return [];
+  }
+}
+
+function findDirectDivChildrenOfFirstDiv(parentElement) {
+  // Find all direct <div> children of the parent
+  const firstDiv = parentElement.querySelector(':scope > div');
+
+  if (!firstDiv) {
+    console.log("No direct <div> child found.");
+    return [];
+  }
+
+  // Find all direct <div> children of the first <div> child
+  return firstDiv.querySelectorAll(':scope > div');
+}
+
 const addExperience = (profile) => {
+  profile.experience = []
   try {
-    let element = document.querySelectorAll('[data-view-name="profile-component-entity"]');
-    if (!element) return
-    // loop over these elements
-    const experience = []
-    for (let i = 0; i < element.length; i++) {
+    const span = [...document.querySelectorAll('span')].find(el => el.textContent.trim() === "Experience");
+    try {
+      let ulExperience = findFirstElementUnderAncestor(span, 'ul');
+      //      console.log("ul with experience ", ulExperience);
 
-      const nodelist = element[i].querySelectorAll('.display-flex.flex-column.full-width')
+      let liExperiences = ulExperience.querySelectorAll(':scope > li');
+      if (liExperiences && liExperiences.length > 0) {
 
-      for (const child of nodelist) {
+        for (let i = 0; i < liExperiences.length; i++) {
+          // console.log("liExperiences[i] ", liExperiences[i]);
+          const newExperience = {}
+          const experienceElement = liExperiences[i]
+          try {
+
+            const divChildren = findDirectDivChildrenOfFirstDiv(experienceElement);
+
+            //   console.log("divs ", divChildren);
+            //             const experienceDivs = findDirectChildren(experienceElement.querySelector('div'), 'div',2)
+            // console.log("experienceDivs ", experienceDivs);
+
+            const experienceCompanyUrl = divChildren[0].querySelector('a').href
+            // console.log("experienceCompanyUrl ", experienceCompanyUrl);
+            newExperience.companyUrl = experienceCompanyUrl
+
+            const experienceCompanyImageUrl = divChildren[0].querySelector('a').querySelector('img')?.src
+            if (experienceCompanyImageUrl) {
+
+              newExperience.companyImageUrl = experienceCompanyImageUrl
+            }
+            const experienceRole = divChildren[1].querySelector('span').textContent
+            //console.log("experienceRole ", experienceRole);
+            newExperience.role = experienceRole
 
 
-        // then find the children div and span and span for role, where and when
-        if (child?.children?.length === 3) {
-          const [firstChild, secondChild, thirdChild] = child.children;
+            const experienceDetails = divChildren[1].querySelector(':scope > div').querySelector(':scope > div').querySelectorAll(' :scope > span')
+            //console.log("experienceDetails ", experienceDetails);
 
-          // Check if the first child is a div and the next two children are spans
-          if (firstChild.tagName.toLowerCase() === 'div' &&
-            secondChild.tagName.toLowerCase() === 'span' &&
-            thirdChild.tagName.toLowerCase() === 'span') {
-            console.log('The element has the correct structure.');
+            // I expect two or three SPAN elements. The first is the company, the second is the period and the third is the location
+            // each span contains two spans. I do not know the difference between the two. They both contain the relevant text
+            if (experienceDetails && experienceDetails.length > 0) {
 
-            console.log(`experience found`, firstChild.innerText, secondChild.innerText, thirdChild.innerText)
-            const newExperience = {}
+              const experienceCompany = experienceDetails[0].querySelector('span').textContent
+              //console.log("experienceCompany ", experienceCompany);
+              newExperience.company = experienceCompany
 
-            newExperience.role = firstChild.innerText
-            newExperience.where = secondChild.innerText
-            newExperience.when = thirdChild.innerText
+              const experiencePeriod = experienceDetails[1].querySelector('span').textContent
+              //console.log("experiencePeriod ", experiencePeriod);
+              newExperience.period = experiencePeriod
 
-            experience.push(newExperience)
-
-
-          } else {
-            console.log('The element does not have the correct structure.');
+              if (experienceDetails.length > 2) {
+                const experienceLocation = experienceDetails[2].querySelector('span').textContent
+                //console.log("experienceLocation ", experienceLocation);
+                newExperience.location = experienceLocation
+              }
+            }
+            console.log("newExperience ", newExperience);
+          } catch (error) {
+            console.error("AddExperience" + error)
           }
+          profile.experience.push(newExperience)
         }
       }
-    }
-    profile.experience = experience
-  } catch (error) {
-
-  }
+      profile.experience = experience
+    } catch (error) { console.error("AddExperience" + error) }
+  } catch (error) { console.error("AddExperience" + error) }
 }
 
 
