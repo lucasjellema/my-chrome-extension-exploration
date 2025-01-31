@@ -22,6 +22,7 @@ const pageTypeChecker = () => {
   chrome.runtime.sendMessage({ action: "togglePageType", personPage: personPage, companyPage: companyPage });
 }
 let lastUrl = location.href;
+pageTypeChecker()
 
 const urlChangeObserver = new MutationObserver(() => {
   if (location.href !== lastUrl) {
@@ -163,7 +164,7 @@ const addCurrentEducation = (profile) => {
       if (educationLogo) {
         console.log("education logo found:", educationLogo.src);
         const imageUrl = educationLogo.src;
-        profile.latestEducationLogo = profile.currentCompanyLogo = imageUrl
+        profile.latestEducationLogo = imageUrl
       }
       const education = button.querySelector('span');
       if (education) {
