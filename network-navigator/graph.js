@@ -6,11 +6,13 @@ import { saveCurrentGraph, getCurrentGraph, loadGraph } from "./utils.js";
 import { addEdgeContextMenu, hideEdgeContextMenu } from "./edge-context-menu.js";
 import { hideElementEditModal } from "./modal-element-editor.js";
 import { initializeFilter } from "./filter.js";
+import { initializeLayout}  from "./layout.js";
 
 let cy
 document.addEventListener("DOMContentLoaded", () => {
     cy = initializeCytoscape();
     initializeFilter(cy);
+    initializeLayout(cy);
 
     // Save graph button
     document.getElementById('save-graph').addEventListener('click', () => {
@@ -32,19 +34,25 @@ export const initializeCytoscape = () => {
                     'label': 'data(label)',
                     'width': 40,
                     'height': 40,
-                    'background-color': function( ele ){  const img = ele.data('image');
-                        return img? 'transparent' : '#0074D9';
-                       },
+                    'background-color': function (ele) {
+                        const img = ele.data('image');
+                        return img ? 'transparent' : '#0074D9';
+                    },
 
                     'text-valign': 'bottom',
                     'color': 'gold',
 
-                    'background-image': function( ele ){  const img = ele.data('image')
-                         return img || 'https://m.media-amazon.com/images/M/MV5BY2JiNjU3NWYtMTRlYS00NzY3LWE2NDQtZGFkNWE2MDU4OTExXkEyXkFqcGc@._V1_QL75_UX280_CR0,0,280,414_.jpg';  // some dummy image that is never actually shown
-                        },
+                    'shape': (ele) => {
+                        const shape = ele.data('shape')
+                        return shape || 'ellipse';
+                    },
+                    'background-image': (ele) => {
+                        const img = ele.data('image')
+                        return img || 'https://m.media-amazon.com/images/M/MV5BY2JiNjU3NWYtMTRlYS00NzY3LWE2NDQtZGFkNWE2MDU4OTExXkEyXkFqcGc@._V1_QL75_UX280_CR0,0,280,414_.jpg';  // some dummy image that is never actually shown
+                    },
                     'background-fit': 'cover',        // Fit the image to the node size
-//                    'background-opacity': 1,          // Ensure the image is fully visible
-                    'background-image-opacity':  function( ele ){  const img = ele.data('image'); return img ? 1 : 0},          // Ensure the image is visible if it exists
+                    //                    'background-opacity': 1,          // Ensure the image is fully visible
+                    'background-image-opacity': function (ele) { const img = ele.data('image'); return img ? 1 : 0 },          // Ensure the image is visible if it exists
                 }
             },
             {

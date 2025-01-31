@@ -98,6 +98,7 @@ const processLinkedInProfile = (message) => {
         companyNode = createNode(cy, profile.currentCompany);
         companyNode.data('image', profile.currentCompanyLogo);
         companyNode.data('type', 'company');
+        companyNode.data('shape', 'square');
       }
       const edge = createEdge(cy, personNode, companyNode);
       edge.data('label', profile.currentRole);
@@ -107,7 +108,8 @@ const processLinkedInProfile = (message) => {
       if (!educationNode) {
         educationNode = createNode(cy, profile.latestEducation);
         educationNode.data('image', profile.latestEducationLogo);
-        educationNode.data('type', 'company');
+        educationNode.data('type', 'education');
+        educationNode.data('shape', 'diamond');
       }
       const edge = createEdge(cy, personNode, educationNode);
       edge.data('label', 'educated at');

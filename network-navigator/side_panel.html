@@ -20,6 +20,7 @@
 <body>
     <h1 id="graphTitle"></h1>
     <button id="filterButton">Filter Nodes</button>
+    <button id="layoutButton">Graph Layout</button>
 
     <div id="cy" style="width: 100% ; height: 600px;"></div>
     <div id="node-context-menu" class="context-menu">
@@ -48,7 +49,7 @@
 
     <div class="modal" id="editModal">
 
-        
+
         <h3 id="modalTitle">Edit Node Properties</h3>
         <div id="propertyList"></div>
         <input type="text" id="newPropertyKey" placeholder="New Property Key" />
@@ -58,22 +59,50 @@
     </div>
     <div id="filterPanel">
         <div id="filterPanelHeader">
-          <h3>Filter Nodes</h3>
-          <button id="closePanelButton" >[X]</button>
+            <h3>Filter Nodes</h3>
+            <button id="closePanelButton">[X]</button>
         </div>
         <label>
-          Enter filter value (Label):
-          <input type="text" id="filterValue" placeholder="Enter label value">
+            Enter filter value (Label):
+            <input type="text" id="filterValue" placeholder="Enter label value">
         </label>
         <label>
             <input type="checkbox" id="includeConnected"> Include Connected Nodes
-          </label>
-          <label>
+        </label>
+        <label>
             <input type="checkbox" id="includeSelected"> Include Selected Nodes
-          </label>
-            <button id="applyFilter">Apply Filter</button>
+        </label>
+        <button id="applyFilter">Apply Filter</button>
         <button id="resetFilter">Reset</button>
-      </div>
+    </div>
+
+    <div id="layoutPanel">
+        <div id="filterPanelHeader">
+            <h3>Select & Apply Layout</h3>
+            <button id="closeLayoutPanelButton">[X]</button>
+        </div>
+        <label>
+            Enter filter value (Label):
+            <label for="layoutValue">Select Layout Style:</label>
+
+            <select id="layoutValue">
+                <option value="">Select Layout Style</option>
+                <option value="random">Random</option>
+                <option value="circle">Circle</option>
+                <option value="concentric">Concentric</option>
+                <option value="breadthfirst">Breadthfirst</option>
+                <option value="grid">Grid</option>
+                <option value="cose">Cose</option>
+            </select>
+        </label>
+        <label>
+            <input type="checkbox" id="onlyVisible"> Only visible Nodes
+        </label>
+        <label>
+            <input type="checkbox" id="onlySelected"> Only Selected Nodes
+        </label>
+        <button id="applyLayout">Apply Layout</button>
+    </div>
 
     <div id="node-tooltip"
         style="display: none; position: absolute; background: #f8f9fa; padding: 8px; border-radius: 4px; border: 1px solid #ddd; box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); font-size: 12px; z-index: 10;">
