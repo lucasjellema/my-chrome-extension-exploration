@@ -17,18 +17,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
   if (message.type === 'linkedInProfile') {
 
-    const contentDiv = document.getElementById('content');
-    contentDiv.textContent = `
-        Profile: ${JSON.stringify(message.profile)}
-        LinkedIn URL: ${message.linkedInUrl}
-      `;
-
-    const profile = message.profile
-    const newNode = createNode(cy, profile.name);
-    newNode.data('url', message.linkedInUrl);
-    newNode.data('type', 'person');
-    newNode.data('subtype', 'linkedInContact');
-    newNode.data('image', profile.image);
+    processLinkedInProfile(message);
 
   }
 
@@ -82,4 +71,47 @@ const addLink = (link) => {
   edge.data('label', targetLabel);
   edge.data('type', 'hyperlink');
 };
+
+const processLinkedInProfile = (message) => {
+  const contentDiv = document.getElementById('content');
+  contentDiv.textContent = `
+        Profile Type: ${JSON.stringify(message.profile.type)} \n
+        Profile: ${JSON.stringify(message.profile)}
+        LinkedIn URL: ${message.linkedInUrl}
+      `;
+
+  const profile = message.profile;
+  if (profile.type === 'person') {
+    let personNode = findNodeByProperty(cy, 'label', profile.name);
+    if (!personNode) {
+      personNode = createNode(cy, profile.name);
+      personNode.data('url', message.linkedInUrl);
+      personNode.data('type', profile.type);
+      personNode.data('subtype', `linkedIn${profile.type}`);
+    }
+    if (profile.image) personNode.data('image', profile.image);
+      personNode.data('about', profile.about);
+
+    if (profile.currentCompany) {
+      let companyNode = findNodeByProperty(cy, 'label', profile.currentCompany);
+      if (!companyNode) {
+        companyNode = createNode(cy, profile.currentCompany);
+        companyNode.data('image', profile.currentCompanyLogo);
+        companyNode.data('type', 'company');
+      }
+      const edge = createEdge(cy, personNode, companyNode);
+      edge.data('label', profile.currentRole);
+    }
+    if (profile.latestEducation) {
+      let educationNode = findNodeByProperty(cy, 'label', profile.latestEducation);
+      if (!educationNode) {
+        educationNode = createNode(cy, profile.latestEducation);
+        educationNode.data('image', profile.latestEducationLogo);
+        educationNode.data('type', 'company');
+      }
+      const edge = createEdge(cy, personNode, educationNode);
+      edge.data('label', 'educated at');
+    }
+  }
+}
 
