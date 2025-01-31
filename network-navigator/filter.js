@@ -61,6 +61,8 @@ const applyFilter = (cy) => {
         if (includeConnected) {
             // Show nodes referenced from the matched nodes (through the edges connected to the matched nodes)
             theElements.connectedEdges().targets().show();
+            // Show nodes referencing (to) the matched nodes (through the edges connected to the matched nodes)
+            theElements.connectedEdges().sources().show();
         }
         // Show edges connected to the matched nodes
         theElements.connectedEdges().show();
