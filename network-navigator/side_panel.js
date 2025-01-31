@@ -15,7 +15,7 @@ import { createEdge, createNode, findNodeByProperty } from './utils.js';
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
-  if (message.type === 'linkedInPersonProfile') {
+  if (message.type === 'linkedInProfile') {
 
     const contentDiv = document.getElementById('content');
     contentDiv.textContent = `

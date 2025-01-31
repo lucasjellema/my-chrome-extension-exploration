@@ -6,10 +6,20 @@ chrome.runtime.onInstalled.addListener(() => {
   });
   chrome.contextMenus.create({
     id: "linkedInInfoForNetwork",
-    title: "Add LinkedIn Person to Network Navigator",
+    title: "Add LinkedIn Details to Network Navigator",
     contexts: ["page"],
     documentUrlPatterns: ["*://www.linkedin.com/*"] 
   });
+});
+
+
+chrome.runtime.onMessage.addListener((message, sender) => {
+  if (message.action === "togglePageType") {
+    chrome.contextMenus.update("linkedInInfoForNetwork", {
+      visible: message.personPage||message.companyPage,
+      title: message.personPage ? "Add LinkedIn Person Details to Network Navigator" : "Add LinkedIn Company Details to Network Navigator"
+    });
+  }
 });
 
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
@@ -22,14 +32,14 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 });
 
 async function handleLinkedInInfo(info, tab) {
-  console.log('linkedIn info clicked ', info);
+  console.log('linkedIn person info clicked ', info);
   //await chrome.sidePanel.open({ tabId: tab.id });
   (async () => {
     const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
     const response = await chrome.tabs.sendMessage(tab.id, { type: 'linkedInInfoRequest'});
     console.log(response);
     chrome.runtime.sendMessage({
-      type: 'linkedInPersonProfile',
+      type: 'linkedInProfile',
       profile: response.data,
       linkedInUrl: response.linkedInUrl
     });
