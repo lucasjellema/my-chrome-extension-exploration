@@ -2,6 +2,7 @@ import { getSelectedNodes, getSavedGraphs, getGraphById, generateGUID, saveCurre
 import { setTitle } from './ui.js';
 const graphContextMenu = document.getElementById('graph-context-menu');
 const addNodeButton = document.getElementById('add-node');
+const selectAllNodesButton = document.getElementById('select-all-nodes');
 const createGraphButton = document.getElementById('create-new-graph');
 const viewGraphsButton = document.getElementById('view-saved-graphs');
 const exportGraphButton = document.getElementById('export-graph');
@@ -17,6 +18,7 @@ export const addGraphContextMenu = (cy) => {
     initialiseViewGraphsButton(cy);
     initialiseCreateGraphsButton(cy);
     initialiseAddNodeButton(cy);
+    initialiseSelectAllNodesButton(cy);
     initialiseExportGraphButton(cy);
     initialiseImportGraphButton(cy);
     cy.on('cxttap', (event) => {
@@ -79,6 +81,12 @@ const initialiseAddNodeButton = (cy) => {
     addNodeButton.addEventListener('click', () => {
         const newNode = createNode(cy, 'New Node');
         newNode.position({ x: clickedPosition.x, y: clickedPosition.y });
+        hideGraphContextMenu(); // Hide the context menu
+    });
+}
+const initialiseSelectAllNodesButton = (cy) => {
+    selectAllNodesButton.addEventListener('click', () => {
+        cy.nodes(':visible').select();
         hideGraphContextMenu(); // Hide the context menu
     });
 }

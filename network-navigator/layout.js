@@ -35,7 +35,22 @@ const applyLayout = (cy) => {
         const newLayout = {
             name: layoutValue
         };
-
+        if (layoutValue === 'concentric') {
+            newLayout.concentric = function (node) {
+                const weight = node.data('type') === 'company' ? 100 : (node.data('type') == 'person' ? 20 : 1);
+                console.log(node.data('label'), weight);
+                return weight;  // Nodes with higher weight go closer to center
+            }
+            newLayout.minNodeSpacing = 100;
+        };
+        if (layoutValue === 'concentric') {
+            newLayout.rows = 3
+            newLayout.sort = (a, b) => {
+                // Define custom sorting based on node type
+                const order = { 'company': 1, 'person': 2, 'education': 3 };
+                return order[a.data('type')] - order[b.data('type')];
+            }
+        }
         const theElements = cy.collection();
         // add currently selected elements
         if (onlySelected) {

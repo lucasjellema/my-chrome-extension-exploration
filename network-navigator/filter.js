@@ -6,7 +6,7 @@ const closePanelButton = document.getElementById('closePanelButton');
 const filterValueInput = document.getElementById('filterValue'); // .value.toLowerCase();
 const includeConnectedCheckBox = document.getElementById('includeConnected'); //.checked
 const includeSelectedCheckBox = document.getElementById('includeSelected'); //.checked
-
+const includeVisibleCheckBox = document.getElementById('includeVisible');
 
 export const initializeFilter = (cy) => {
     filterButton.addEventListener('click', () => {
@@ -39,16 +39,22 @@ const resetFilter = (cy) => {
 const applyFilter = (cy) => {
     const filterValue = filterValueInput.value.trim();
     const includeConnected = includeConnectedCheckBox.checked;
+    const includeVisible = includeVisibleCheckBox.checked;
+    const includeSelected = includeSelectedCheckBox.checked;
     if (filterValue) {
-        // Reset all elements to hidden first
+        const theElements = cy.collection();
+        if (includeVisible) {
+            const visibleNodes = cy.nodes(':visible');
+            theElements.merge(cy.nodes(visibleNodes))
+        }
+
         cy.elements().hide();
 
-        const theElements = cy.collection();
         // add currently selected elements
-        if (includeSelectedCheckBox.checked) {
-
+        if (includeSelected) {
             theElements.merge(cy.$(':selected'));
         }
+
         // https://js.cytoscape.org/#collection/traversing 
         // Select nodes with the matching prefix
         const matchedNodes = cy.nodes().filter((node) =>

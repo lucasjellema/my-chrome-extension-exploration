@@ -31,12 +31,15 @@
     <div id="graph-context-menu" class="context-menu">
         <ul>
             <li id="add-node">Add Node</li>
+            <li id="select-all-nodes">Select All Nodes</li>
             <li id="create-new-graph">Create Graph</li>
             <li id="view-saved-graphs">View Saved Graphs</li>
             <li id="export-graph">Export Current Graph</li>
+            <li id="import-graph"> <label for="importInput">Import Graph from JSON</label>
+                <input type="file" id="import-graph" accept=".json" />
+            </li>
+
         </ul>
-        <label for="importInput">Import Graph from JSON</label>
-        <input type="file" id="import-graph" accept=".json" />
     </div>
     <div id="graphs-overview" class="context-menu">
     </div>
@@ -48,8 +51,6 @@
     </div>
 
     <div class="modal" id="editModal">
-
-
         <h3 id="modalTitle">Edit Node Properties</h3>
         <div id="propertyList"></div>
         <input type="text" id="newPropertyKey" placeholder="New Property Key" />
@@ -71,6 +72,8 @@
         </label>
         <label>
             <input type="checkbox" id="includeSelected"> Include Selected Nodes
+        </label> <label>
+            <input type="checkbox" id="includeVisible"> Include Visible Nodes
         </label>
         <button id="applyFilter">Apply Filter</button>
         <button id="resetFilter">Reset</button>
