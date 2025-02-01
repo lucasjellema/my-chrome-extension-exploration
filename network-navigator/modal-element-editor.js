@@ -1,5 +1,5 @@
 const modal = document.getElementById('editModal');
-const propertyList = document.getElementById('propertyList');
+const propertyList = document.getElementById('editPropertyList');
 const newPropertyKey = document.getElementById('newPropertyKey');
 const newPropertyValue = document.getElementById('newPropertyValue');
 const saveButton = document.getElementById('saveChanges');

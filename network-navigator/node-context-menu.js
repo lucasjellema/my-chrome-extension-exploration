@@ -1,5 +1,6 @@
 import { getSelectedNodes, createEdge, generateGUID } from './utils.js';
 import { editNode } from './modal-element-editor.js';
+import { showNodeDetails     }   from './modal-element-properties.js';
 
 let editMode = false
 
@@ -30,7 +31,7 @@ export const addNodeContextMenu = (cy) => {
         const detailsNodeButton = document.createElement('button');
         detailsNodeButton.textContent = 'Show Details for ' + selectedNode.data('label');
         detailsNodeButton.addEventListener('click', () => {
-            showNodeDetails(selectedNode);
+            showNodeDetails(cy,selectedNode);
             hideNodeContextMenu();
 
         });
