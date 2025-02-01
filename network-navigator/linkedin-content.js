@@ -62,6 +62,8 @@ const getProfile = () => {
   addName(profile)
   addImage(profile)
   addContact(profile)
+  addLocation(profile)
+  
   addCurrentRole(profile)
   addCurrentCompany(profile)
   addCurrentEducation(profile)
@@ -113,14 +115,29 @@ const addContact = (profile) => {
   try {
     const element = document.getElementsByClassName('pv-contact-info__header')[0]
     if (!element) return
-    const contact = element.textContent
+    const contact = element.textContent.replace(/\n/g, '').trim()
     profile.contact = contact
   } catch (error) {
 
   }
 }
 
+const addLocation = (profile) => {
+  try {
+    // main section div [1] div [1]
+    const targetDiv = document.querySelector("main section div:nth-of-type(2) ");
 
+    const element = [...targetDiv.querySelectorAll('a')]
+    .find(el => el.textContent.trim() === "Contact info");    
+    
+    if (!element) return
+    const grandparent = element?.parentElement?.parentElement;
+    const locationSpan =grandparent?.querySelector("span") || null;
+    if (!locationSpan) return
+    const location = locationSpan.textContent.replace(/\n/g, '').trim()
+    profile.location = location
+  } catch (error) {}
+}
 
 const addCurrentRole = (profile) => {
   try {
