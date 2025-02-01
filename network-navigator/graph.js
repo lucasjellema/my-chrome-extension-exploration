@@ -127,8 +127,12 @@ export const initializeCytoscape = () => {
     cy.on('tapdragover', 'edge', (event) => {
         event.originalEvent.preventDefault(); // Prevent default browser context menu
         const edge = event.target;
-        const label = edge.data('label');
-        const additionalInfo = "more information: ";
+        let label = edge.data('label');
+        let additionalInfo = "";
+        if (edge.data('type') === 'workAt') {
+            label += ' ' + edge.target().data('label');
+            additionalInfo += " as "+ edge.data('currentRole');
+        }
         showTooltip(label, additionalInfo, event);
     });
 
