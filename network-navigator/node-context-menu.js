@@ -93,6 +93,15 @@ export const addNodeContextMenu = (cy) => {
                     });
                     nodeContextMenu.appendChild(makeNodeChildButton);
 
+                    const deleteSelectedNodesButton = document.createElement('button');
+                    deleteSelectedNodesButton.textContent = `Delete All ${selectedNodes.length} Selected Nodes `;
+                    deleteSelectedNodesButton.addEventListener('click', () => {
+                        deleteAllSelectedNodes(cy);
+                        hideNodeContextMenu();
+        
+                    });
+                    nodeContextMenu.appendChild(deleteSelectedNodesButton);
+
                 }
                 // create edge from selectedNode to selectedNodes[0]
                 const createEdgeButton = document.createElement('button');
@@ -135,6 +144,14 @@ export const hideNodeContextMenu = () => {
 
 const deleteNode = (selectedNode) => {
     selectedNode.remove();
+    hideNodeContextMenu();
+}
+
+const deleteAllSelectedNodes = (cy) => {
+    const selectedNodes = getSelectedNodes(cy);
+    selectedNodes.forEach((node) => {
+        node.remove();
+    });
     hideNodeContextMenu();
 }
 
