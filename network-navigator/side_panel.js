@@ -87,10 +87,11 @@ const processLinkedInProfile = (message) => {
       personNode = createNode(cy, profile.name);
       personNode.data('url', message.linkedInUrl);
       personNode.data('type', profile.type);
-      personNode.data('subtype', `linkedIn${profile.type}`);
+      personNode.data('subtype', `linkedIn${profile.type}`);      
     }
     if (profile.image) personNode.data('image', profile.image);
-      personNode.data('about', profile.about);
+    personNode.data('about', profile.about);
+    if (profile.location) personNode.data('location', profile.location);
 
     if (profile.currentCompany) {
       let companyNode = findNodeByProperty(cy, 'label', profile.currentCompany);
@@ -101,7 +102,9 @@ const processLinkedInProfile = (message) => {
         companyNode.data('shape', 'square');
       }
       const edge = createEdge(cy, personNode, companyNode);
-      edge.data('label', profile.currentRole);
+      edge.data('label', 'works at');
+      edge.data('type', 'workAt');
+      edge.data('currentRole', profile.currentRole);
     }
     if (profile.latestEducation) {
       let educationNode = findNodeByProperty(cy, 'label', profile.latestEducation);
@@ -113,6 +116,7 @@ const processLinkedInProfile = (message) => {
       }
       const edge = createEdge(cy, personNode, educationNode);
       edge.data('label', 'educated at');
+      edge.data('type', 'educatedAt');
     }
   }
 }
