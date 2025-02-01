@@ -3,12 +3,14 @@ import { setTitle } from './ui.js';
 const graphContextMenu = document.getElementById('graph-context-menu');
 const addNodeButton = document.getElementById('add-node');
 const selectAllNodesButton = document.getElementById('select-all-nodes');
+const editModeButton = document.getElementById('edit-mode-toggle');
 const createGraphButton = document.getElementById('create-new-graph');
 const viewGraphsButton = document.getElementById('view-saved-graphs');
 const exportGraphButton = document.getElementById('export-graph');
 const importGraphButton = document.getElementById('import-graph');
 
 let clickedPosition
+let editMode = false
 
 graphContextMenu.addEventListener('contextmenu', (event) => { // do not show a context menu on the context menu
     event.preventDefault();
@@ -19,6 +21,7 @@ export const addGraphContextMenu = (cy) => {
     initialiseCreateGraphsButton(cy);
     initialiseAddNodeButton(cy);
     initialiseSelectAllNodesButton(cy);
+    initialiseEditModeButton(cy);
     initialiseExportGraphButton(cy);
     initialiseImportGraphButton(cy);
     cy.on('cxttap', (event) => {
@@ -50,6 +53,25 @@ const initialiseExportGraphButton = (cy) => {
         URL.revokeObjectURL(url);
         hideGraphContextMenu(); // Hide the context menu
     });
+}
+
+const initialiseEditModeButton = (cy) => {
+    editModeButton.addEventListener('click', () => {
+        editMode = !editMode;
+        document.dispatchEvent(new CustomEvent("editModeToggled", {detail: { editMode: editMode }})); // inform any consumers that editMode is toggled
+        updateGraphContextMenuForEditMode(cy, editMode);
+        editModeButton.innerHTML = editMode ? 'Exit Edit Mode' : 'Enter Edit Mode';
+        hideGraphContextMenu(); // Hide the context menu
+    });
+}
+const updateGraphContextMenuForEditMode = (cy, editMode) => {
+    if (editMode) {
+        addNodeButton.style.display = 'none';
+        createGraphButton.style.display = 'none';
+    } else {
+        addNodeButton.style.display = 'block';
+        createGraphButton.style.display = 'block';     
+    }
 }
 
 const initialiseImportGraphButton = (cy) => {
