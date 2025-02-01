@@ -133,6 +133,9 @@ export const initializeCytoscape = () => {
             label += ' ' + edge.target().data('label');
             additionalInfo += " as "+ edge.data('currentRole');
         }
+        if (edge.data('type') === 'educatedAt') {
+            label += ' ' + edge.target().data('label');
+        }
         showTooltip(label, additionalInfo, event);
     });
 
