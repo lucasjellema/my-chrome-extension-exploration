@@ -118,31 +118,30 @@ export const initializeCytoscape = () => {
 
     cy.on('tapdragover', 'node', (event) => {
         event.originalEvent.preventDefault(); // Prevent default browser context menu
-
         const node = event.target;
         const label = node.data('label');
         const additionalInfo = "more information: " + node.data('additionalInfo');
-        const tooltip = document.getElementById('node-tooltip');
-
-        // Set tooltip content
-        tooltip.innerHTML = `
-         <strong>${label}</strong><br>
-         ${additionalInfo}
-       `;
-        const clickPosition = event.renderedPosition;
-
-        // Position the tooltip near the mouse pointer
-        tooltip.style.left = `${clickPosition.x + 10}px`;
-        tooltip.style.top = `${clickPosition.y + 10}px`;
-        tooltip.style.display = "block";
-
+        showTooltip(label, additionalInfo, event);
     });
+
+    cy.on('tapdragover', 'edge', (event) => {
+        event.originalEvent.preventDefault(); // Prevent default browser context menu
+        const edge = event.target;
+        const label = edge.data('label');
+        const additionalInfo = "more information: ";
+        showTooltip(label, additionalInfo, event);
+    });
+
 
     const hideTooltip = () => {
         const tooltip = document.getElementById('node-tooltip');
         tooltip.style.display = "none";
     };
+
     cy.on('tapdragout', 'node', () => {
+        hideTooltip();
+    });
+    cy.on('tapdragout', 'edge', () => {
         hideTooltip();
     });
 
@@ -173,5 +172,20 @@ export const initializeCytoscape = () => {
 
     });
     return cy
+}
+
+function showTooltip(label, additionalInfo, event) {
+    const tooltip = document.getElementById('node-tooltip');
+
+    // Set tooltip content
+    tooltip.innerHTML = `
+         <strong>${label}</strong><br>
+         ${additionalInfo}
+       `;
+    const clickPosition = event.renderedPosition;
+    // Position the tooltip near the mouse pointer
+    tooltip.style.left = `${clickPosition.x + 10}px`;
+    tooltip.style.top = `${clickPosition.y + 10}px`;
+    tooltip.style.display = "block";
 }
 
