@@ -9,6 +9,7 @@ const viewGraphsButton = document.getElementById('view-saved-graphs');
 const exportGraphButton = document.getElementById('export-graph');
 const exportOnlyVisibleGraphButton = document.getElementById('export-visible-graph');
 const importGraphButton = document.getElementById('import-graph');
+const importMergeGraphButton = document.getElementById('import-merge-graph');
 
 let clickedPosition
 let editMode = false
@@ -26,6 +27,7 @@ export const addGraphContextMenu = (cy) => {
     initialiseExportGraphButton(cy);
     initialiseExportVisibleGraphButton(cy);
     initialiseImportGraphButton(cy);
+    initialiseImportMergeGraphButton(cy);
     cy.on('cxttap', (event) => {
         if (event.target === cy) {
             const pos = event.renderedPosition;
@@ -95,6 +97,111 @@ const initialiseImportGraphButton = (cy) => {
         }
         hideGraphContextMenu(); // Hide the context menu
     });
+}
+
+const initialiseImportMergeGraphButton = (cy) => {
+    importMergeGraphButton.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const graphData = JSON.parse(e.target.result);
+                    const nodeIdMap = {};
+                    // iterate over all nodes in the imported graph
+                    for (const node of graphData.elements) {
+                        // check if the node already exists in the current graph
+                        if (node.group === 'nodes') {
+                            let existingNode = cy.$id(node.data.id)[0] || null;
+                            if (!existingNode) {
+                                // find node of same type and with same label
+                                const matchingNodes = cy.filter(function (element, i) {
+                                    return element.isNode() && leement.data('label') === node.data.label && element.data('type') === node.data.type;
+                                })
+                                if (matchingNodes.length > 0) {
+                                    existingNode = matchingNodes[0];
+                                }
+                            }
+                            if (existingNode) {
+                                console.log(`Node ${node.data.id} already exists:`, existingNode.data('id'));
+                                // TODO merge node into existing node
+                                nodeIdMap[node.data.id] = existingNode.data('id');
+                                mergeNodes(node, existingNode);
+                            } else {
+                                console.log(`Node ${node.data.id} does not exist:`, node.data.id);
+                                cy.add(node);
+                                nodeIdMap[node.data.id] = node.data.id;
+                            }
+                        }
+                    }
+                    console.log(nodeIdMap);
+                    console.log('Start on edges');
+                    for (const edge of graphData.elements) {
+
+                        if (edge.group === 'edges') {
+                            console.log(`Edge ${edge.data.id} is processed:`, edge.data.id);
+
+                            const sourceId = edge.data.source;
+                            const targetId = edge.data.target;
+                            edge.data.source = nodeIdMap[sourceId];
+                            edge.data.target = nodeIdMap[targetId];
+                            let existingEdge = cy.$id(edge.data.id)[0] || null;
+                            if (!existingEdge) {
+                                // find edge of same type and with same label
+                                const matchingEdges = cy.filter(function (element, i) {
+                                    return element.isEdge() && element.data('label') === edge.data.label && element.data('type') === edge.data.type
+                                    && element.data('source') === edge.data.source && element.data('target') === edge.data.target;
+                                })
+                                if (matchingEdges.length > 0) {
+                                    existingEdge = matchingEdges[0];
+                                }
+                            }
+
+
+                            if (!existingEdge) {
+
+                                // TODO find existing edge by source and target and type & label / key? (and merge into it)
+                                console.log(`Edge ${edge.data.id} does not exist:`, edge.data.id);
+                                cy.add(edge);
+
+                            } else {
+                                console.log(`Edge ${edge.data.id} already exists:`, existingEdge.data('id'));
+                                mergeNodes(edge, existingEdge);
+                            }
+                        }
+                    }
+
+                } catch (error) {
+                    console.error('Invalid JSON file:', error);
+                    alert('Failed to import graph. Please make sure the file is a valid JSON.');
+                }
+            };
+            // Read the file as text
+            reader.readAsText(file);
+        }
+        hideGraphContextMenu(); // Hide the context menu
+    });
+}
+
+const mergeNodes = (sourceNode, targetNode) => {
+    // iterate over all properties in sourceNode
+    for (const [key, value] of Object.entries(sourceNode.data)) {
+        if (key === 'id' || key === 'type') continue;
+        targetNode.data(key,  sourceNode.data[key]);
+        console.log('Merged property', key, value);
+    }
+}
+
+
+
+const mergeEdges = (sourceEdge, targetEdge) => {
+    // iterate over all properties in sourceEdge
+    for (const [key, value] of Object.entries(sourceEdge.data)) {
+        if (key === 'id' || key === 'type' || key === 'source' || key === 'target') continue;
+        targetEdge.data(key,  sourceEdge.data[key]);
+        console.log('Merged property', key, value);
+    }
 }
 
 const initialiseAddNodeButton = (cy) => {
@@ -183,8 +290,8 @@ export const hideGraphContextMenu = () => {
 function exportGraphToJsonFile(cy, onlyVisible) {
     let graphJson = getCurrentGraph(cy);
 
-    if (onlyVisible) graphJson.elements      = cy.elements(':visible').map(ele => ele.json());
-    
+    if (onlyVisible) graphJson.elements = cy.elements(':visible').map(ele => ele.json());
+
 
     //
     // Convert JSON to a downloadable file
