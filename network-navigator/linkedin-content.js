@@ -341,8 +341,6 @@ const addExperience = (profile) => {
                   }
                   profile.experience.push(thisExperience);
 
-
-
                 }
 
                 continue; // ready with this DIV
@@ -362,7 +360,7 @@ const addExperience = (profile) => {
             //console.log("experienceRole ", experienceRole);
             newExperience.role = experienceRole
 
-
+            // the first div under divChildren[1] contains role, company, period
             const experienceDetails = divChildren[1].querySelector(':scope > div').querySelector(':scope > div').querySelectorAll(' :scope > span')
             //console.log("experienceDetails ", experienceDetails);
 
@@ -385,6 +383,14 @@ const addExperience = (profile) => {
                 const experienceLocation = experienceDetails[2].querySelector('span').textContent.split('·')
                 //console.log("experienceLocation ", experienceLocation);
                 newExperience.location = experienceLocation[0].trim()
+              }
+
+              // the second div under divChildren[1] contains further description
+              const secondDiv =  divChildren[1].querySelector(':scope > div:nth-of-type(2)')
+              console.log("secondDiv ", secondDiv);
+              if (secondDiv) {
+                const experienceAbout = secondDiv.querySelector('span').textContent
+                newExperience.about = experienceAbout
               }
             }
             console.log("newExperience ", newExperience);
