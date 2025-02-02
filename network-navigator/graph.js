@@ -69,6 +69,7 @@ export const initializeCytoscape = () => {
                     'color': '#555',
                     'text-rotation': 'autorotate', // Align the label with the edge
                     'text-margin-y': -10, // Adjust the label's vertical position relative to the edge
+                    'selectable': 'true' // Enable selection
                 },
             }, {
                 selector: 'node:selected',
@@ -77,6 +78,13 @@ export const initializeCytoscape = () => {
                     'border-width': 4,            // Thicker border
                     'border-color': '#FF851B'     // Highlight border color
                 }
+            },
+            { 
+              selector: 'edge:selected', 
+              style: { 
+                'line-color': 'red', // Change color when selected
+                'width': 5 
+              } 
             },
             {
                 selector: '.highlighted',
