@@ -5,8 +5,9 @@ import { setTitle } from './ui.js';
 import { saveCurrentGraph, getCurrentGraph, loadGraph } from "./utils.js";
 import { addEdgeContextMenu, hideEdgeContextMenu } from "./edge-context-menu.js";
 import { hideElementEditModal } from "./modal-element-editor.js";
+import { hideElementPropertiesModal } from "./modal-element-properties.js"
 import { initializeFilter } from "./filter.js";
-import { initializeLayout}  from "./layout.js";
+import { initializeLayout } from "./layout.js";
 
 let cy
 document.addEventListener("DOMContentLoaded", () => {
@@ -120,7 +121,8 @@ export const initializeCytoscape = () => {
         event.originalEvent.preventDefault(); // Prevent default browser context menu
         const node = event.target;
         const label = node.data('label');
-        const additionalInfo = "more information: " + node.data('additionalInfo');
+        let additionalInfo
+        if (node.data('type') === 'person') { additionalInfo = node.data('currentRole'); }
         showTooltip(label, additionalInfo, event);
     });
 
@@ -128,10 +130,10 @@ export const initializeCytoscape = () => {
         event.originalEvent.preventDefault(); // Prevent default browser context menu
         const edge = event.target;
         let label = edge.data('label');
-        let additionalInfo = "";
+        let additionalInfo ;
         if (edge.data('type') === 'workAt') {
             label += ' ' + edge.target().data('label');
-            additionalInfo += " as "+ edge.data('currentRole');
+            additionalInfo = " as " + edge.data('role');
         }
         if (edge.data('type') === 'educatedAt') {
             label += ' ' + edge.target().data('label');
@@ -176,6 +178,8 @@ export const initializeCytoscape = () => {
         hideGraphContextMenu();
         hideGraphListModal();
         hideElementEditModal();
+        hideElementPropertiesModal();
+
 
     });
     return cy
@@ -184,11 +188,12 @@ export const initializeCytoscape = () => {
 function showTooltip(label, additionalInfo, event) {
     const tooltip = document.getElementById('node-tooltip');
 
+    let innerHTML = `<strong>${label}</strong>`;
+    if (additionalInfo) {
+        innerHTML += '<br>' + additionalInfo;
+    }
     // Set tooltip content
-    tooltip.innerHTML = `
-         <strong>${label}</strong><br>
-         ${additionalInfo}
-       `;
+    tooltip.innerHTML = innerHTML;
     const clickPosition = event.renderedPosition;
     // Position the tooltip near the mouse pointer
     tooltip.style.left = `${clickPosition.x + 10}px`;
