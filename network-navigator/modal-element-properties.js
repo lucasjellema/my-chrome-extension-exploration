@@ -9,13 +9,13 @@ let edgeToShow = null;
 
 export const showNodeDetails = (cy, node) => {
     nodeToShow = node;
-    modalTitle.textContent = 'Node Properties ' + node.data('label');
+    modalTitle.textContent = node.data('label');
     showModal(cy, node);
 }
 
 export const showEdgeDetails = (cy, edge) => {
     edgeToShow = edge;
-    modalTitle.textContent = 'Edge Properties ' + edge.data('label');
+    modalTitle.textContent = 'Details for ' + edge.data('label') + ' ' + edge.target().data('label');
     showModal(cy, edge);
 }
 
@@ -26,7 +26,7 @@ const showModal = (cy, element) => {
 
     for (const key in data) {
         // skip property id 
-        if (key === 'id'|| key === 'label' || key === 'type'||key === 'subtype'|| key === 'shape') continue;
+        if (key === 'id' || key === 'label' || key === 'type' || key === 'subtype' || key === 'shape') continue;
         // for edges, skip properties source and target
         if (edgeToShow && (key === 'source' || key === 'target')) continue;
 
@@ -45,9 +45,9 @@ const showModal = (cy, element) => {
                 window.open(value, '_blank');
             });
             div.appendChild(linkOpener);
-                    
-                    
-        } 
+
+
+        }
         // if key ends with image than show image
         else if (key.toLocaleLowerCase().endsWith('image')) {
             const image = document.createElement('img');
@@ -59,7 +59,7 @@ const showModal = (cy, element) => {
         else {
             div.innerHTML = `<label>${key}: ${value}</label>`;
         }
-propertyList.appendChild(div);
+        propertyList.appendChild(div);
     }
 
     // Show the modal
@@ -67,15 +67,16 @@ propertyList.appendChild(div);
 };
 
 // Function to hide the modal
-export const hideElementModal = () => {
+export const hideElementPropertiesModal = () => {
     nodeToShow = null;
     edgeToShow = null;
     modal.style.display = 'none';
 };
-closeButton.addEventListener('click', () => {
 
+
+closeButton.addEventListener('click', () => {
     // Simply hide the modal without making changes
-    hideElementModal();
+    hideElementPropertiesModal();
 });
 
 const getTopValuesForProperty = (cy, propertyKey) => {

@@ -12,13 +12,13 @@ let edgeToEdit = null;
 
 export const editNode = (cy, node) => {
     nodeToEdit = node;
-    modalTitle.textContent = 'Edit Node Properties ' + node.data('label');
+    modalTitle.textContent = 'Edit ' + node.data('label');
     showModal(cy, node);
 }
 
 export const editEdge = (cy, edge) => {
     edgeToEdit = edge;
-    modalTitle.textContent = 'Edit Edge Properties';
+    modalTitle.textContent = 'Edit '+ edge.data('label') + edge.target().data('label');
     showModal(cy, edge);
 }
 
