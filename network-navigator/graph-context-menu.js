@@ -7,6 +7,7 @@ const editModeButton = document.getElementById('edit-mode-toggle');
 const createGraphButton = document.getElementById('create-new-graph');
 const viewGraphsButton = document.getElementById('view-saved-graphs');
 const exportGraphButton = document.getElementById('export-graph');
+const exportOnlyVisibleGraphButton = document.getElementById('export-visible-graph');
 const importGraphButton = document.getElementById('import-graph');
 
 let clickedPosition
@@ -23,6 +24,7 @@ export const addGraphContextMenu = (cy) => {
     initialiseSelectAllNodesButton(cy);
     initialiseEditModeButton(cy);
     initialiseExportGraphButton(cy);
+    initialiseExportVisibleGraphButton(cy);
     initialiseImportGraphButton(cy);
     cy.on('cxttap', (event) => {
         if (event.target === cy) {
@@ -38,27 +40,23 @@ export const addGraphContextMenu = (cy) => {
 
 const initialiseExportGraphButton = (cy) => {
     exportGraphButton.addEventListener('click', () => {
-        const graphJson = getCurrentGraph(cy);
-        // Convert JSON to a downloadable file
-        const blob = new Blob([JSON.stringify(graphJson, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-
-        // Create a temporary link to download the file
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'graph.json'; // File name for the download
-        a.click();
-
-        // Revoke the object URL to free up memory
-        URL.revokeObjectURL(url);
+        exportGraphToJsonFile(cy, false); // onlySelected = false
         hideGraphContextMenu(); // Hide the context menu
     });
 }
 
+const initialiseExportVisibleGraphButton = (cy) => {
+    exportOnlyVisibleGraphButton.addEventListener('click', () => {
+        exportGraphToJsonFile(cy, true); // onlyVisible = false
+        hideGraphContextMenu(); // Hide the context menu
+    });
+}
+
+
 const initialiseEditModeButton = (cy) => {
     editModeButton.addEventListener('click', () => {
         editMode = !editMode;
-        document.dispatchEvent(new CustomEvent("editModeToggled", {detail: { editMode: editMode }})); // inform any consumers that editMode is toggled
+        document.dispatchEvent(new CustomEvent("editModeToggled", { detail: { editMode: editMode } })); // inform any consumers that editMode is toggled
         updateGraphContextMenuForEditMode(cy, editMode);
         editModeButton.innerHTML = editMode ? 'Exit Edit Mode' : 'Enter Edit Mode';
         hideGraphContextMenu(); // Hide the context menu
@@ -70,7 +68,7 @@ const updateGraphContextMenuForEditMode = (cy, editMode) => {
         createGraphButton.style.display = 'none';
     } else {
         addNodeButton.style.display = 'block';
-        createGraphButton.style.display = 'block';     
+        createGraphButton.style.display = 'block';
     }
 }
 
@@ -180,4 +178,25 @@ const initialiseViewGraphsButton = (cy) => {
 
 export const hideGraphContextMenu = () => {
     graphContextMenu.style.display = 'none';
+}
+
+function exportGraphToJsonFile(cy, onlyVisible) {
+    let graphJson = getCurrentGraph(cy);
+
+    if (onlyVisible) graphJson.elements      = cy.elements(':visible').map(ele => ele.json());
+    
+
+    //
+    // Convert JSON to a downloadable file
+    const blob = new Blob([JSON.stringify(graphJson, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+
+    // Create a temporary link to download the file
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'graph.json'; // File name for the download
+    a.click();
+
+    // Revoke the object URL to free up memory
+    URL.revokeObjectURL(url);
 }
