@@ -8,26 +8,45 @@ chrome.runtime.onInstalled.addListener(() => {
     id: "linkedInInfoForNetwork",
     title: "Add LinkedIn Details to Network Navigator",
     contexts: ["page"],
-    documentUrlPatterns: ["*://www.linkedin.com/*"] 
+    documentUrlPatterns: ["*://www.linkedin.com/*"]
+  });
+  chrome.contextMenus.create({
+    id: "imdbInfoForNetwork",
+    title: "Add IMDb Details to Network Navigator",
+    contexts: ["page"],
+    documentUrlPatterns: ["*://www.imdb.com/*"]
   });
 });
 
 
 chrome.runtime.onMessage.addListener((message, sender) => {
   if (message.action === "togglePageType") {
-    chrome.contextMenus.update("linkedInInfoForNetwork", {
-      visible: message.personPage||message.companyPage,
-      title: message.personPage ? "Add LinkedIn Person Details to Network Navigator" : "Add LinkedIn Company Details to Network Navigator"
-    });
+    if (message.contentExtension === "linkedin") {
+
+      chrome.contextMenus.update("linkedInInfoForNetwork", {
+        visible: message.personPage || message.companyPage,
+        title: message.personPage ? "Add LinkedIn Person Details to Network Navigator" : "Add LinkedIn Company Details to Network Navigator"
+      });
+    }
+    if (message.contentExtension === "imdb") {
+
+      chrome.contextMenus.update("imdbInfoForNetwork", {
+        visible: message.namePage || message.titlePage,
+        title: message.namePage ? "Add IMDB Person Details to Network Navigator" : "Add IMBD Title Details to Network Navigator"
+      });
+    }
   }
 });
 
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   if (info.menuItemId === "linkInfoForNetwork") {
-    await handleLinkInfo(info, tab);  
+    await handleLinkInfo(info, tab);
   }
   if (info.menuItemId === "linkedInInfoForNetwork") {
     await handleLinkedInInfo(info, tab);
+  }
+  if (info.menuItemId === "imdbInfoForNetwork") {
+    await handleImdbInfo(info, tab);
   }
 });
 
@@ -36,12 +55,26 @@ async function handleLinkedInInfo(info, tab) {
   //await chrome.sidePanel.open({ tabId: tab.id });
   (async () => {
     const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
-    const response = await chrome.tabs.sendMessage(tab.id, { type: 'linkedInInfoRequest'});
+    const response = await chrome.tabs.sendMessage(tab.id, { type: 'linkedInInfoRequest' });
     console.log(response);
     chrome.runtime.sendMessage({
       type: 'linkedInProfile',
       profile: response.data,
       linkedInUrl: response.linkedInUrl
+    });
+  })()
+}
+
+async function handleImdbInfo(info, tab) {
+  console.log('imdb info clicked ', info);
+  (async () => {
+    const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+    const response = await chrome.tabs.sendMessage(tab.id, { type: 'imdbInfoRequest' });
+    console.log(response);
+    chrome.runtime.sendMessage({
+      type: 'imdbProfile',
+      profile: response.data,
+      imdbUrl: response.imdbUrl
     });
   })()
 }

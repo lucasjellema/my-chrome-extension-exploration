@@ -19,6 +19,11 @@
       "matches": ["https://www.linkedin.com/*"],
       "js": ["linkedin-content.js"],
       "run_at": "document_end" 
+    },
+    {
+      "matches": ["https://www.imdb.com/*"],
+      "js": ["imdb-content.js"],
+      "run_at": "document_end" 
     }
   ],
   "action": {

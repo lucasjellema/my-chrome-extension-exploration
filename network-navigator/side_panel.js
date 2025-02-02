@@ -1,5 +1,6 @@
 import { createEdge, createNode, findNodeByProperty } from './utils.js';
 import {processLinkedInProfile} from './processLinkedInProfile.js';
+import {processImdbProfile} from './processImdbProfile.js';
 // chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 //   if (message.type === 'linkInfo') {
 //     const contentDiv = document.getElementById('content');
@@ -23,9 +24,10 @@ document.addEventListener("cyInitialized", (event) => {
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
   if (message.type === 'linkedInProfile') {
-
     processLinkedInProfile(cy, message);
-
+  }
+  if (message.type === 'imdbProfile') {
+    processImdbProfile(cy, message);
   }
 
   if (message.type === 'linkInfo') {

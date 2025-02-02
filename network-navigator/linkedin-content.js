@@ -19,7 +19,7 @@ const pageTypeChecker = () => {
     console.log('DO NOT SHOW PERSON MENU ITEM');
     personPage =  false
   }
-  chrome.runtime.sendMessage({ action: "togglePageType", personPage: personPage, companyPage: companyPage });
+  chrome.runtime.sendMessage({ action: "togglePageType", contentExtension: "linkedin", personPage: personPage, companyPage: companyPage });
 }
 let lastUrl = location.href;
 pageTypeChecker()
