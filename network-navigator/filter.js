@@ -58,7 +58,7 @@ const applyFilter = (cy) => {
         // https://js.cytoscape.org/#collection/traversing 
         // Select nodes with the matching prefix
         const matchedNodes = cy.nodes().filter((node) =>
-            node.data('label').startsWith(filterValue)
+            node.data('label')?.startsWith(filterValue)
         );
         theElements.merge(matchedNodes);
         // Show matched nodes
