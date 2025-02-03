@@ -211,7 +211,7 @@ const addPortfolio = (profile) => {
       // TODO distinguish between actor performance and director performance  id: accordion-item-director-previous-projects
       // as well as writer and producer
       const portfolio = []
-      const perspectives = ['actor', 'director', 'writer', 'producer']
+      const perspectives = ['actor', 'actress','director', 'writer', 'producer']
       for (const perspective of perspectives) {
         const portfolioUl = document.getElementById(`accordion-item-${perspective}-previous-projects`)?.querySelector('ul');
         console.log('portfolioUl', portfolioUl)
