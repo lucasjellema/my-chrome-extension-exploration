@@ -8,10 +8,45 @@ export const processImdbProfile = (cy, message) => {
           IMDB URL: ${message.imdbUrl}
         `;
 
-
+    let newNodes = cy.collection();
     const profile = message.profile;
+    if (profile.type === 'name') {
+        let nameNode = findNodeByProperty(cy, 'label', profile.name);
+        if (!nameNode) {
+            nameNode = createNode(cy, profile.name);
+            nameNode.data('url', message.imdbUrl);
+            nameNode.data('type', profile.type);
+            nameNode.data('subtype', `imdb${profile.subtype}`);
+            nameNode.data('shape', 'star');
+            newNodes = newNodes.union(nameNode);
+        }
+        if (profile.image) nameNode.data('image', profile.image);
+        if (profile.bio) nameNode.data('bio', profile.bio);
+        if (profile.birthDate) nameNode.data('birthDate', profile.birthDate);
+        if (profile.deathDate) nameNode.data('deathDate', profile.deathDate);
 
-
+        if (profile.portfolio) {
+            profile.portfolio.forEach(activity => {
+                let titleNode = findNodeByProperty(cy, 'label', activity.title);
+                if (!titleNode) {
+                    titleNode = createNode(cy, activity.title);
+                    titleNode.data('url', activity.url);
+                    titleNode.data('type', 'title');
+                    titleNode.data('subtype', `actor`);
+                    titleNode.data('shape', 'square');
+                    newNodes = newNodes.union(titleNode);
+                }
+                if (activity.image) titleNode.data('image', activity.image);
+                if (activity.details) titleNode.data('year', activity.details[0]);
+         
+                const edge = createEdge(cy, nameNode, titleNode);
+                edge.data('label', activity.perspective);
+                edge.data('type', activity.perspective);
+                edge.data('character', activity.character[0]);
+                
+            });
+        }
+    }
 
     if (profile.type === 'title') {
         let titleNode = findNodeByProperty(cy, 'label', profile.name);
@@ -19,16 +54,19 @@ export const processImdbProfile = (cy, message) => {
             titleNode = createNode(cy, profile.name);
             titleNode.data('url', message.imdbUrl);
             titleNode.data('type', profile.type);
-            titleNode.data('rating', profile.rating.split('/')[0]);
+            
             titleNode.data('subtype', `imdb${profile.subtype}`);
             titleNode.data('shape', 'square');
-
+            newNodes = newNodes.union(titleNode);
         }
+        titleNode.data('rating', profile.rating.split('/')[0]);
         if (profile.image) titleNode.data('image', profile.image);
         if (profile.plot) titleNode.data('plot', profile.plot);
         if (profile.period) titleNode.data('period', profile.period);
         if (profile.chips) titleNode.data('tags', profile.chips);
-
+        if (profile.Director) titleNode.data('director', profile.Director.reduce((acc, director) => acc + ', ' + director.name + ', ', ''));
+        if (profile.Writers) titleNode.data('writers', profile.Writers.reduce((acc, writer) => acc + ', ' + writer.name + ', ', ''));
+        if (profile.Creators) titleNode.data('creators', profile.Creators.reduce((acc, creator) => acc + ', ' + creator.name + ', ', ''));
         if (profile.cast) {
             profile.cast.forEach(actor => {
                 let actorNode = findNodeByProperty(cy, 'label', actor.name);
@@ -38,6 +76,7 @@ export const processImdbProfile = (cy, message) => {
                     actorNode.data('type', 'person');
                     actorNode.data('subtype', `actor`);
                     actorNode.data('shape', 'star');
+                    newNodes = newNodes.union(actorNode);
                 }
                 if (actor.image) actorNode.data('image', actor.image);
                 const edge = createEdge(cy, actorNode, titleNode);
@@ -47,81 +86,21 @@ export const processImdbProfile = (cy, message) => {
                 edge.data('details', actor.details);
             });
         }
+
         // personNode.data('about', profile.about);
         // if (profile.location) personNode.data('location', profile.location);
 
     }
-/*
-        if (profile.currentCompany) {
-            personNode.data('currentCompany', profile.currentCompany);
-            let companyNode = findNodeByProperty(cy, 'label', profile.currentCompany);
-            if (!companyNode) {
-                companyNode = createNode(cy, profile.currentCompany);
-                companyNode.data('image', profile.currentCompanyLogo);
-                //companyNode.data('url', profile.companyUrl);
-                companyNode.data('type', 'company');
-                companyNode.data('shape', 'square');
-            }
-            const edge = createEdge(cy, personNode, companyNode);
-            edge.data('label', 'works at');
-            edge.data('type', 'workAt');
-            edge.data('role', profile.currentRole);
-        }
-        if (profile.latestEducation) {
-            let educationNode = findNodeByProperty(cy, 'label', profile.latestEducation);
-            if (!educationNode) {
-                educationNode = createNode(cy, profile.latestEducation);
-                educationNode.data('image', profile.latestEducationLogo);
-                educationNode.data('type', 'education');
-                educationNode.data('shape', 'diamond');
-            }
-            const edge = createEdge(cy, personNode, educationNode);
-            edge.data('label', 'educated at');
-            edge.data('type', 'educatedAt');
-        }
-
-        // handle experience
-        if (profile.experience) {
-            // loop over elements in array experience
-            for (let i = 0; i < profile.experience.length; i++) {
-                const experience = profile.experience[i];
-                let companyNode = findNodeByProperty(cy, 'label', experience.company);
-
-                if (!companyNode) {
-                    companyNode = createNode(cy, experience.company);
-                    companyNode.data('image', experience.companyImageUrl);
-                    companyNode.data('url', experience.companyUrl);
-                    companyNode.data('type', 'company');
-                    companyNode.data('shape', 'square');
-                }
-                companyNode.data('linkedInUrl', experience.companyUrl);
-                const edge = createEdge(cy, personNode, companyNode);
-                edge.data('label', 'works at');
-                edge.data('type', 'workAt');
-                edge.data('role', experience.role);
-                edge.data('location', experience.location);
-                edge.data('period', experience.period);
-
-                const parts = experience.period.split('-')
-                const startDate = new Date(`${parts[0]} 1`);
-                edge.data('startDate', startDate);
-                if (parts[1] === "Present") {
-                    edge.data('endDate', new Date());
-                    edge.data('present', true);
-                } else {
-                    const endDate = new Date(`${parts[1]} 1`);
-                    edge.data('endDate', endDate);
-                }
-
-
-
-                edge.data('about', experience.about);
-                edge.data('involvement', experience.involvement);
-
-            }
-        }
-
-
-    }
-*/
-    }
+            // run layout for new nodes
+            newNodes.layout({
+                name: 'random',
+                animate: true,
+                animateFilter: function (node, i) {
+                    return true;
+                },
+                animationDuration: 1000,
+                animationEasing: undefined,
+                fit: true,
+            })
+                .run();
+}
