@@ -57,13 +57,20 @@ const getProfile = () => {
     addPeriod(profile)
     addChipsAndAbout(profile)
     addCast(profile)
+  }
+  if (namePage) {
+    addImage(profile)
+    addBirthDeath(profile)
+    addBio(profile)
+    addPersonSubtype(profile)
+    addPortfolio(profile)
 
   }
   return profile
 }
 
 const addName = (profile) => {
-  profile.name = document.querySelector('h1').textContent
+  profile.name = document.querySelector('h1').querySelector('span').textContent
 }
 
 const addType = (profile) => {
@@ -103,6 +110,26 @@ const addPeriod = (profile) => {
     }
   }
 }
+
+const addBirthDeath = (profile) => {
+  let birthDeathDivs = document.querySelectorAll('div[data-testid="birth-and-death-birthdate"]');
+  if (birthDeathDivs.length > 0) {
+    const birth = birthDeathDivs[0].querySelector('span:nth-of-type(2)').textContent
+    if (birth) {
+      profile.birthDate = birth
+    }
+  }
+  let deathDivs = document.querySelectorAll('div[data-testid="birth-and-death-deathdate"]');
+
+  if (deathDivs.length > 0) {
+    const death = deathDivs[0].querySelector('span:nth-of-type(2)').textContent
+    if (death) {
+      profile.deathDate = death
+    }
+  }
+
+}
+
 const addImage = (profile) => {
   const h1 = document.querySelector('h1')
   if (h1) {
@@ -113,6 +140,7 @@ const addImage = (profile) => {
         const img = nextElementSibling.querySelector('img')
         if (img) {
           profile.image = img.src
+
         }
       }
     }
@@ -132,6 +160,98 @@ const addChipsAndAbout = (profile) => {
   console.log('plotP', plotP)
   if (plotP) {
     profile.plot = plotP.querySelector('span:nth-of-type(2)').textContent.trim();
+  }
+  let detailsDiv = plotP.nextElementSibling
+  if (detailsDiv) {
+    const detailLines = detailsDiv.querySelector('ul').querySelectorAll(':scope >li');
+    console.log('detailLines', detailLines)
+    if (detailLines) {
+      for (let i = 0; i < detailLines.length; i++) {
+        const detail = detailLines[i];
+        const detailKey = detail.firstElementChild.textContent?.trim();
+        let detailValue = detail.querySelector('div')?.textContent?.trim();
+
+        // next sibling is a DIV with UL with LIs for each writer, creator, director, star  ; in the LI: an ANCHOR to the IMDB page of the person and text content with the name
+        // create entries for each person 
+        const detailLIs = detail.querySelector('div').querySelector('ul').querySelectorAll(':scope >li');
+        if (detailLIs) {
+          detailValue = []
+          detailLIs.forEach((li) => {
+
+            detailValue.push({
+              name: li.querySelector('a')?.textContent?.trim(),
+              url: li.querySelector('a')?.href?.trim()
+            })
+          })
+        }
+        profile[detailKey] = detailValue;
+      }
+      //      profile.details = [...detailLines].map(detail => detail.textContent.trim());
+    }
+  }
+}
+
+
+
+
+const addPortfolio = (profile) => {
+  let filmographyDiv = document.querySelector('div[data-testid="Filmography"]');
+  if (filmographyDiv) {
+    console.log('filmographyDiv', filmographyDiv)
+    const portfolioDiv = filmographyDiv.querySelector(':scope > section:nth-of-type(2)').querySelector(':scope > div:nth-of-type(5)')
+    console.log('portfolioDiv', portfolioDiv)
+    if (portfolioDiv) {
+      // const portfolioUl = portfolioDiv.querySelector('ul:nth-of-type(2)');
+      // console.log('portfolioUl', portfolioUl)
+      // if (portfolioUl) {
+      //   profile.portfolio = [...portfolioUl.querySelectorAll('li')].map(portfolio => portfolio.textContent.trim());
+      // }
+
+
+      // TODO distinguish between actor performance and director performance  id: accordion-item-director-previous-projects
+      // as well as writer and producer
+      const portfolio = []
+      const perspectives = ['actor', 'director', 'writer', 'producer']
+      for (const perspective of perspectives) {
+        const portfolioUl = document.getElementById(`accordion-item-${perspective}-previous-projects`)?.querySelector('ul');
+        console.log('portfolioUl', portfolioUl)
+
+        if (portfolioUl) {
+          const items = portfolioUl.querySelectorAll(':scope > li');
+          console.log('items', items)
+          for (let i = 0; i < items.length; i++) {
+            const item = items[i];
+            const performance = {perspective}
+            performance.image = item.querySelector(':scope > div').querySelector('img')?.src;
+            const anchor = item.querySelector(':scope > div:nth-of-type(2)').querySelector('a')
+            if (anchor) {
+              performance.title = anchor.textContent.trim();
+              performance.url = anchor.href;
+            }
+            const ul = anchor.nextElementSibling.nextElementSibling
+            if (ul) {
+              const characterLIs = ul.querySelectorAll(':scope > li');
+              if (characterLIs) {
+                performance.character = [...characterLIs].map(character => character.textContent.trim());
+              }
+            }
+
+            const detailsDiv = item.querySelector(':scope > div:nth-of-type(2)').querySelector(':scope > div:nth-of-type(2)')
+            const detailsUL = detailsDiv?.querySelector('ul')
+            if (detailsUL) {
+              const detailsLIs = detailsUL.querySelectorAll(':scope > li');
+              if (detailsLIs) {
+                performance.details = [...detailsLIs].map(detail => detail.textContent.trim());
+              }
+            }
+
+            portfolio.push(performance)
+            console.log('performance', JSON.stringify(performance))
+          }
+        }
+      }
+      profile.portfolio = portfolio
+    }
   }
 }
 
@@ -177,5 +297,35 @@ const addRating = (profile) => {
     if (ratingValue) {
       profile.rating = ratingValue;
     }
+  }
+}
+
+const addBio = (profile) => {
+  const h1 = document.querySelector('h1')
+  if (h1) {
+    const grandparent = h1.parentElement.parentElement
+    if (grandparent) {
+      const nextElementSibling = grandparent.nextElementSibling
+      const divWithBio = nextElementSibling.querySelector(':scope > div:nth-of-type(2)')
+      console.log('divWithBio', divWithBio)
+      if (divWithBio) {
+        const bio = divWithBio.querySelector('section').querySelector(':scope > div').querySelector(':scope > div').querySelector(':scope > div').querySelector(':scope > div').textContent
+        profile.bio = bio
+        console.log('bio', bio)
+      }
+    }
+  }
+
+}
+const addPersonSubtype = (profile) => {
+  const h1 = document.querySelector('h1')
+  if (h1) {
+    const nextSib = h1.nextElementSibling
+    const liWithSubtype = nextSib.querySelectorAll('li')
+    let subtype = ""
+    for (let i = 0; i < liWithSubtype.length; i++) {
+      subtype = +liWithSubtype[i].textContent + ","
+    }
+    if (subtype.length > 0) profile.subtype = subtype
   }
 }
