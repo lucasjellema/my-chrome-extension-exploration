@@ -207,7 +207,7 @@ const showPathFrom = (cy, startNode, destinationNode) => {
     const dijkstra = cy.elements().dijkstra({
         root: startNode,
         weight: edge => edge.data('weight') || 1,  // Default weight is 1 if not provided
-        directed: true
+        directed: false // walk edges only from source to target or in both directions
     });
 
     // Get the shortest path to the target node
@@ -216,6 +216,7 @@ const showPathFrom = (cy, startNode, destinationNode) => {
     if (path.length > 0) {
         console.log('Shortest path found:', path.map(ele => ele.id()));
         path.addClass('highlighted'); // Highlight the path
+        cy.scratch('shortestPath', path);
     } else {
         console.log('No path exists between the selected nodes.');
         alert('No path exists between the selected nodes.');
