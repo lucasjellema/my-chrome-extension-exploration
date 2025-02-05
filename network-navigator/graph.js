@@ -131,6 +131,7 @@ export const initializeCytoscape = () => {
         const label = node.data('label');
         let additionalInfo
         if (node.data('type') === 'person') { additionalInfo = node.data('currentRole'); }
+        if (node.data('type') === 'ociResource') { additionalInfo = node.data('subtype'); }
         showTooltip(label, additionalInfo, event);
     });
 
