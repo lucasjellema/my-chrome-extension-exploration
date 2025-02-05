@@ -24,6 +24,11 @@
       "matches": ["https://www.imdb.com/*"],
       "js": ["imdb-content.js"],
       "run_at": "document_end" 
+    },
+    {
+      "matches": ["https://cloud.oracle.com/*"],
+      "js": ["oci-content.js"],
+      "run_at": "document_end" 
     }
   ],
   "action": {

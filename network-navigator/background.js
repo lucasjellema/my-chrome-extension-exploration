@@ -16,6 +16,12 @@ chrome.runtime.onInstalled.addListener(() => {
     contexts: ["page"],
     documentUrlPatterns: ["*://www.imdb.com/*"]
   });
+  chrome.contextMenus.create({
+    id: "ociInfoForNetwork",
+    title: "Add OCI Details to Network Navigator",
+    contexts: ["page"],
+    documentUrlPatterns: ["*://cloud.oracle.com/*"]
+  });
 });
 
 
@@ -42,8 +48,11 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   if (info.menuItemId === "linkInfoForNetwork") {
     await handleLinkInfo(info, tab);
   }
-  if (info.menuItemId === "linkedInInfoForNetwork") {
-    await handleLinkedInInfo(info, tab);
+  if (info.menuItemId === "ociInfoForNetwork") {
+    await handleLinkInfo(info, tab);
+  }
+  if (info.menuItemId === "ociInfoForNetwork") {
+    await handleOCIInfo(info, tab);
   }
   if (info.menuItemId === "imdbInfoForNetwork") {
     await handleImdbInfo(info, tab);
@@ -64,6 +73,22 @@ async function handleLinkedInInfo(info, tab) {
     });
   })()
 }
+
+async function handleOCIInfo(info, tab) {
+  console.log('OCI info clicked ', info);
+  //await chrome.sidePanel.open({ tabId: tab.id });
+  (async () => {
+    const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+    const response = await chrome.tabs.sendMessage(tab.id, { type: 'ociInfoRequest' });
+    console.log(response);
+    chrome.runtime.sendMessage({
+      type: 'ociProfile',
+      profile: response.data,
+      linkedInUrl: response.ociInUrl
+    });
+  })()
+}
+
 
 async function handleImdbInfo(info, tab) {
   console.log('imdb info clicked ', info);
