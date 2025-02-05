@@ -5,6 +5,8 @@
     <title>Network Navigator</title>
     <link rel="stylesheet" href="network-navigator.css">
     <script src="cytoscape.min.js"></script>
+    <script src="cytoscape-euler.js"></script>
+    
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -79,12 +81,15 @@
             <input type="text" id="filterValue" placeholder="Enter label value">
         </label>
         <label>
-            <input type="checkbox" id="includeConnected"> Include Connected Nodes
-        </label>
-        <label>
             <input type="checkbox" id="includeSelected"> Include Selected Nodes
         </label> <label>
             <input type="checkbox" id="includeVisible"> Include Visible Nodes
+        </label>
+        <label>
+            <input type="checkbox" id="includePath"> Include Nodes on Shortest Path
+        </label>
+        <label>
+            <input type="checkbox" id="includeConnected"> Include Connected Nodes
         </label>
         <button id="applyFilter">Apply Filter</button>
         <button id="resetFilter">Reset</button>
@@ -107,6 +112,7 @@
                 <option value="breadthfirst">Breadthfirst</option>
                 <option value="grid">Grid</option>
                 <option value="cose">Cose</option>
+                <option value="euler">Euler</option>
             </select>
         </label>
         <label>

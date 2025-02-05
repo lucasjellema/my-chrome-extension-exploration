@@ -43,13 +43,19 @@ const applyLayout = (cy) => {
             }
             newLayout.minNodeSpacing = 100;
         };
-        if (layoutValue === 'concentric') {
+        if (layoutValue === 'grid') {
             newLayout.rows = 3
             newLayout.sort = (a, b) => {
                 // Define custom sorting based on node type
                 const order = { 'company': 1, 'person': 2, 'education': 3 };
                 return order[a.data('type')] - order[b.data('type')];
             }
+        }
+
+        if (layoutValue === 'euler') {
+            newLayout.mass= 2
+            newLayout.springLength= 80
+            
         }
         const theElements = cy.collection();
         // add currently selected elements
