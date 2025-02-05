@@ -51,7 +51,14 @@ const showModal = (cy, element) => {
         // if key ends with image than show image
         else if (key.toLocaleLowerCase().endsWith('image')) {
             const image = document.createElement('img');
-            image.src = value;
+            if (value.startsWith('url("')) {                
+                //remove first 5 and last 2 characters                
+                const v = value.substring(5, value.length - 2);
+                image.src = v;
+            }
+            else
+                image.src = value;
+            
             image.width = 100;
             image.height = 100;
             div.appendChild(image);
