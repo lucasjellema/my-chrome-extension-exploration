@@ -48,8 +48,8 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   if (info.menuItemId === "linkInfoForNetwork") {
     await handleLinkInfo(info, tab);
   }
-  if (info.menuItemId === "ociInfoForNetwork") {
-    await handleLinkInfo(info, tab);
+  if (info.menuItemId === "linkedInInfoForNetwork") {
+    await handleLinkedInInfo(info, tab);
   }
   if (info.menuItemId === "ociInfoForNetwork") {
     await handleOCIInfo(info, tab);
@@ -84,7 +84,7 @@ async function handleOCIInfo(info, tab) {
     chrome.runtime.sendMessage({
       type: 'ociProfile',
       profile: response.data,
-      linkedInUrl: response.ociInUrl
+      ociUrl: response.ociUrl
     });
   })()
 }

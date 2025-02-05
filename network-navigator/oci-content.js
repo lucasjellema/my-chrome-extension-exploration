@@ -66,9 +66,7 @@ const getResourceType = (profile) => {
 
       if (breadcrumb) {
         console.log("breadcrumb ", breadcrumb)
-        profile.resourceType = breadcrumb.lastElementChild.textContent
-        // strip " Details" from resource type
-        profile.resourceType = profile.resourceType.replace(' Details', '')
+        profile.resourceType = breadcrumb.lastElementChild.textContent.replace(' details', '').replace(' Details', '')
         profile.ociService = breadcrumb.firstElementChild.textContent
       }
 
@@ -77,11 +75,12 @@ const getResourceType = (profile) => {
         console.log("copyAction ", copyAction)
         const ocid = copyAction.querySelector(':scope > span').firstElementChild.textContent
         profile.ocid = ocid
+        profile.subtype = ocid.split('.')[1]
       }
       const h1 = iframeDoc.querySelector('h1');
       if (h1) {
         console.log("h1 ", h1)
-        const name = h1.textContent
+        const name = getImmediateTextContent(h1)
         profile.name = name
       }
       const span = iframeDoc.querySelector('span.compartment-path');
@@ -111,14 +110,12 @@ const getResourceType = (profile) => {
           const href = reference.href
           if (href && !href.startsWith(location.href)) // not a local link 
             // if href refers to https://cloud.oracle.com/ and contains /ocid1. then this is an OCI resource reference
-            if (href.startsWith('https://cloud.oracle.com/') && href.includes('/ocid1.')) {
+            if (href.startsWith('https://cloud.oracle.com/') && href.includes('/ocid1.') && !reference.textContent.includes('Skip to main content')) {
               console.log("href ", href)
               const ociResourceReference = {}
               const parts = href.split('/');
               const resourceId = parts[parts.length - 1]; // .pop() removes and returns the last element, we can achieve the same by accessing the last element
               if (resourceId.startsWith('ocid1.')) {
-
-
                 ociResourceReference.ocid = resourceId.split('?')[0]
                 ociResourceReference.href = href
                 ociResourceReference.name = reference.textContent
@@ -143,3 +140,9 @@ const getResourceType = (profile) => {
 
 }
 
+const getImmediateTextContent = (element)=> {
+  return Array.from(element.childNodes)
+    .filter(node => node.nodeType === Node.TEXT_NODE) // Get only text nodes
+    .map(node => node.textContent.trim()) // Trim whitespace
+    .join(" "); // Join if multiple text nodes
+}
