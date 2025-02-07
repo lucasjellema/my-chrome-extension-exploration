@@ -18,12 +18,12 @@ export const processOciProfile = (cy, message) => {
         ociNode.data('type', 'ociResource');
         ociNode.data('ocid', profile.ocid);
         ociNode.data('subtype', profile.subtype);
-        ociNode.data('ociService', `oci${profile.ociService}`);
+        ociNode.data('ociService', `${profile.ociService}`);
         ociNode.data('shape', 'rectangle');
         // TODO set image with the proper OCI icon
         const icon = resourceTypeImageMap[profile.subtype];
         if (icon) ociNode.data('image', 'url("images/oci-images/' + icon + '")');
-//        ociNode.data('image', 'url("images/oci-images/Buckets.png")');
+
 
         newNodes = newNodes.union(ociNode);
     }
