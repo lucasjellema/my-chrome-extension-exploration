@@ -9,6 +9,7 @@ const viewGraphsButton = document.getElementById('view-saved-graphs');
 const exportGraphButton = document.getElementById('export-graph');
 const exportOnlyVisibleGraphButton = document.getElementById('export-visible-graph');
 const importGraphButton = document.getElementById('import-graph');
+const importRemoteGraphButton = document.getElementById('import-remote-graph');
 const importMergeGraphButton = document.getElementById('import-merge-graph');
 
 let clickedPosition
@@ -27,6 +28,7 @@ export const addGraphContextMenu = (cy) => {
     initialiseExportGraphButton(cy);
     initialiseExportVisibleGraphButton(cy);
     initialiseImportGraphButton(cy);
+    initialiseImportRemoteGraphButton(cy);
     initialiseImportMergeGraphButton(cy);
     cy.on('cxttap', (event) => {
         if (event.target === cy) {
@@ -99,6 +101,43 @@ const initialiseImportGraphButton = (cy) => {
     });
 }
 
+
+const getJSONFile = (url) => {
+    return new Promise((resolve, reject) => {
+        fetch(url, { method: 'GET' })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok ' + response.statusText);
+                }
+                resolve(response.json())
+            })
+            .catch(err =>
+                resolve(1)
+            );
+    })
+}
+const initialiseImportRemoteGraphButton = (cy) => {
+    importRemoteGraphButton.addEventListener('click', async (event) => {
+        const remoteGraphURL = prompt("Enter URL for remote graph:");
+
+        if (remoteGraphURL) {
+            try {
+                const graphData = await getJSONFile(remoteGraphURL)
+                // assign new graphData.id ??
+                const newId = generateGUID();
+                saveGraph(newId, graphData.title, graphData.description, graphData.elements);
+                console.log('Graph successfully imported:', graphData);
+                loadGraph(cy, getGraphById(graphData.id));
+            } catch (error) {
+                console.error('Invalid JSON file:', error);
+                alert('Failed to import graph. Please make sure the file is a valid JSON.');
+            }
+        }
+        hideGraphContextMenu(); // Hide the context menu
+    });
+}
+
+
 const initialiseImportMergeGraphButton = (cy) => {
     importMergeGraphButton.addEventListener('change', (event) => {
         const file = event.target.files[0];
@@ -151,7 +190,7 @@ const initialiseImportMergeGraphButton = (cy) => {
                                 // find edge of same type and with same label
                                 const matchingEdges = cy.filter(function (element, i) {
                                     return element.isEdge() && element.data('label') === edge.data.label && element.data('type') === edge.data.type
-                                    && element.data('source') === edge.data.source && element.data('target') === edge.data.target;
+                                        && element.data('source') === edge.data.source && element.data('target') === edge.data.target;
                                 })
                                 if (matchingEdges.length > 0) {
                                     existingEdge = matchingEdges[0];
@@ -188,7 +227,7 @@ const mergeNodes = (sourceNode, targetNode) => {
     // iterate over all properties in sourceNode
     for (const [key, value] of Object.entries(sourceNode.data)) {
         if (key === 'id' || key === 'type') continue;
-        targetNode.data(key,  sourceNode.data[key]);
+        targetNode.data(key, sourceNode.data[key]);
         console.log('Merged property', key, value);
     }
 }
@@ -199,7 +238,7 @@ const mergeEdges = (sourceEdge, targetEdge) => {
     // iterate over all properties in sourceEdge
     for (const [key, value] of Object.entries(sourceEdge.data)) {
         if (key === 'id' || key === 'type' || key === 'source' || key === 'target') continue;
-        targetEdge.data(key,  sourceEdge.data[key]);
+        targetEdge.data(key, sourceEdge.data[key]);
         console.log('Merged property', key, value);
     }
 }
