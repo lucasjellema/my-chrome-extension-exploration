@@ -70,12 +70,26 @@ const getResourceType = (profile) => {
         profile.ociService = breadcrumb.firstElementChild.textContent
       }
 
-      const copyAction = iframeDoc.querySelector('span[data-name="copy-action"]');
-      if (copyAction) {
-        console.log("copyAction ", copyAction)
-        const ocid = copyAction.querySelector(':scope > span').firstElementChild.textContent
-        profile.ocid = ocid
-        profile.subtype = ocid.split('.')[1]
+      const copyActions = iframeDoc.querySelectorAll('span[data-name="copy-action"]');
+      // we need a copyAction that has a first DIV ancestor that contains OCID in the text content
+
+
+      // This section of code attempts to find the OCID of the resource in the page.
+      // The OCID is a unique identifier for the resource in OCI.
+      // We are looking for a copyAction that has a first DIV ancestor that contains "OCID" in the text content.
+      // If we find one, we extract the OCID from the text content of the first SPAN element inside the copyAction.
+      // If we don't find one, we leave the profile.ocid property as undefined.
+      if (copyActions) {
+        for (const copyAction of copyActions) {
+          console.log("copyAction ", copyAction)
+          const divAncestor = copyAction.closest("div"); // Finds the closest ancestor <div>
+          if (divAncestor && divAncestor.textContent.includes("OCID")) { // Checks if the text content of the ancestor <div> includes "OCID"
+            const ocid = copyAction.querySelector(':scope > span').firstElementChild.textContent // Extracts the OCID from the text content of the first SPAN element inside the copyAction
+            profile.ocid = ocid
+            profile.subtype = ocid.split('.')[1] // Extracts the subtype from the OCID
+            break; // Stops looking once we found one
+          }
+        }
       }
       const h1 = iframeDoc.querySelector('h1');
       if (h1) {
@@ -125,11 +139,11 @@ const getResourceType = (profile) => {
                 ociResourceReferences.push(ociResourceReference)
               }
             }
-          }
-          profile.ociResourceReferences = ociResourceReferences
-
         }
+        profile.ociResourceReferences = ociResourceReferences
+
       }
+    }
 
 
     catch (error) {
@@ -140,7 +154,7 @@ const getResourceType = (profile) => {
 
 }
 
-const getImmediateTextContent = (element)=> {
+const getImmediateTextContent = (element) => {
   return Array.from(element.childNodes)
     .filter(node => node.nodeType === Node.TEXT_NODE) // Get only text nodes
     .map(node => node.textContent.trim()) // Trim whitespace
