@@ -17,7 +17,7 @@ const pageTypeChecker = () => {
     personPage = true
   } else {
     console.log('DO NOT SHOW PERSON MENU ITEM');
-    personPage =  false
+    personPage = false
   }
   chrome.runtime.sendMessage({ action: "togglePageType", contentExtension: "linkedin", personPage: personPage, companyPage: companyPage });
 }
@@ -39,9 +39,9 @@ urlChangeObserver.observe(document.body, { childList: true, subtree: true });
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   console.log("Received message:", message);
-  if (message.type === 'linkedInInfoRequest') {
+  if (message.type === 'linkedInInfoRequestForNetwork') {
     console.log("LinkedIn Info request received: ");
-    let profile = getProfile()
+    let profile = getLinkedInProfile()
     profile.type = personPage ? 'person' : 'company'
     console.log("Profile:", profile)
     sendResponse({ status: 'success', data: profile, linkedInUrl: window.location.href });
@@ -54,23 +54,88 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
 console.log('content.js loaded - linkedin-summarizer extension');
 
-const getProfile = () => {
+const getLinkedInProfile = () => {
 
   console.log("Send Profile Details")
 
   const profile = {}
-  addName(profile)
-  addImage(profile)
-  addContact(profile)
-  addLocation(profile)
-  
-  addCurrentRole(profile)
-  addCurrentCompany(profile)
-  addCurrentEducation(profile)
-  addAbout(profile)
-  addExperience(profile)
+  if (personPage) {
+
+
+    addName(profile)
+    addImage(profile)
+    addContact(profile)
+    addLocation(profile)
+
+    addCurrentRole(profile)
+    addCurrentCompany(profile)
+    addCurrentEducation(profile)
+    addAbout(profile)
+    addExperience(profile)
+  }
+  if (companyPage) {
+    addCompanyDetails(profile)
+  }
   return profile
-  //  chrome.runtime.sendMessage({ type: 'linkedinProfile', data: profile });
+
+}
+
+const addCompanyDetails = (profile) => {
+  try {
+
+    // find div with class org-top-card__primary-content 
+    const div = document.querySelector('div.org-top-card__primary-content');
+    if (!div) return
+    // find first img
+    const img = div.querySelector('img')
+    profile.image = img.src
+    const h1 = div.querySelector('h1')
+    profile.name = h1.textContent.replace(/\n/g, '').trim()
+    const tagline = div.querySelector('p.org-top-card-summary__tagline')
+    profile.tagline = tagline?.textContent.replace(/\n/g, '').trim()
+    const infolistDiv = div.querySelector('div.org-top-card-summary-info-list')
+    if (infolistDiv) {
+      const infoList = infolistDiv.querySelectorAll('.org-top-card-summary-info-list__info-item')
+      console.log('infoList', infoList)
+      if (infoList.length > 0) {
+        profile.industry = infoList[0].textContent.replace(/\n/g, '').trim()
+        profile.location = infoList[1].textContent.replace(/\n/g, '').trim()
+        profile.followers = infoList[2].textContent.replace(/\n/g, '').trim()
+        profile.numberOfEmployees = infoList[3].textContent.replace(/\n/g, '').trim()
+      }
+    }
+
+    // li with class org-locations-module__location-card
+    const locations = document.querySelectorAll('li.org-locations-module__location-card')
+    if (locations.length > 0) {
+      profile.locations = []
+      for (const location of locations) {
+        const address = location.querySelector('p')
+        if (address) {
+          profile.locations.push(address.textContent.replace(/\n/g, '').trim())
+        }
+
+      }
+    }
+    // find h3 elements and then the one with textContent = Website 
+    const h3s = document.querySelectorAll('h3')
+    if (h3s) {
+      for (const h3 of h3s) {
+        if (h3.textContent && h3.textContent.includes('Website')) {
+          // go from h3 to parent, to next sibling to anchor
+          const dd = h3.parentElement.nextElementSibling
+          const anchor = dd.querySelector('a')
+          profile.websiteUrl = anchor.href
+        }
+      }
+    }
+
+
+
+  } catch (error) {
+
+  }
+
 }
 
 const addName = (profile) => {
@@ -128,15 +193,15 @@ const addLocation = (profile) => {
     const targetDiv = document.querySelector("main section div:nth-of-type(2) ");
 
     const element = [...targetDiv.querySelectorAll('a')]
-    .find(el => el.textContent.trim() === "Contact info");    
-    
+      .find(el => el.textContent.trim() === "Contact info");
+
     if (!element) return
     const grandparent = element?.parentElement?.parentElement;
-    const locationSpan =grandparent?.querySelector("span") || null;
+    const locationSpan = grandparent?.querySelector("span") || null;
     if (!locationSpan) return
     const location = locationSpan.textContent.replace(/\n/g, '').trim()
     profile.location = location
-  } catch (error) {}
+  } catch (error) { }
 }
 
 const addCurrentRole = (profile) => {
@@ -386,7 +451,7 @@ const addExperience = (profile) => {
               }
 
               // the second div under divChildren[1] contains further description
-              const secondDiv =  divChildren[1].querySelector(':scope > div:nth-of-type(2)')
+              const secondDiv = divChildren[1].querySelector(':scope > div:nth-of-type(2)')
               console.log("secondDiv ", secondDiv);
               if (secondDiv) {
                 const experienceAbout = secondDiv.querySelector('span').textContent

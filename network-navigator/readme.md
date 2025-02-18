@@ -29,23 +29,28 @@ When a link is selected in the current web page and the option Add Link to Netwo
 Todo:
 * + download / upload graph data to/from JSON file
 * filter nodes/edges on type / label / date
-* show image/icon in a node 
-* do not show tooltip when context menu is open
+* + show image/icon in a node 
+* + do not show tooltip when context menu is open
 * + edit node properties
 * + edit edge properties 
 * + merge nodes (and have all edges connect to merge result)
 * merge graphs
-* select multiple nodes - bulk delete
+* + select multiple nodes - bulk delete
 * delete graph
-* use combobox for editing node properties with (most frequently occuring) existing values
+* + use combobox for editing node properties with (most frequently occuring) existing values
+* load graph from URL (OCI, GitHub, ...)
+* + show node details (not for editing)
+* + show edge details
+* * hide all nodes not in path
 
 * LinkedIn addin - publishes
-  * name
-  * image (url)
-  * about/description
-  * company (role, from, until)
-  * location (country, area)
-  * university
+  * + name
+  * + image (url)
+  * + about/description
+  * + company (role, from, until)
+  * + location (country, area)
+  * + university
+  * education (history)
   * contacts - referenced people 
 
 * Wikipedia addin for people (for example https://en.wikipedia.org/wiki/Steve_Jobs) - publishes
@@ -70,6 +75,26 @@ Todo:
   * related technology 
   * latest release (year, label)
 
+* IMDB addin 
+  * movies, series, character/role (cast, stars), actor, creator, director, 
+    * + title
+    * + release year
+    * + storyline
+    * + genres
+    * + rating
+    * + image
+    * + url (on imdb)
+  * role/character
+    * + name
+  * actor
+    * + name
+    * + image
+    * + bio
+    * + <other roles>
+    * + url (on imdb)
+    * + birthdate
+    * birthplace
+    * <social media>
 
 
 ## Useful information
@@ -174,3 +199,11 @@ Edit
 'background-position-x': '50%',
 'background-position-y': '50%',
 'background-clip': 'none',
+
+
+## Add Euler Layout
+
+* npm install cytoscape-euler
+* move cytoscape-euler.js from node-modules to root of extension
+* remove node-modules directory
+* import cytoscape-euler.js in side_panel.html 

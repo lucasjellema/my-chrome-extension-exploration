@@ -10,7 +10,7 @@ import { initializeFilter } from "./filter.js";
 import { initializeLayout } from "./layout.js";
 
 let cy
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("networkNavigatorContentLoaded", () => {
     cy = initializeCytoscape();
     initializeFilter(cy);
     initializeLayout(cy);

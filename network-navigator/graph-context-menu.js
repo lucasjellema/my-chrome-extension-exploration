@@ -1,23 +1,33 @@
 import { getSelectedNodes, getSavedGraphs, getGraphById, generateGUID, saveCurrentGraph, loadGraph, getCurrentGraph, saveGraph, createNode } from './utils.js';
 import { setTitle } from './ui.js';
-const graphContextMenu = document.getElementById('graph-context-menu');
-const addNodeButton = document.getElementById('add-node');
-const selectAllNodesButton = document.getElementById('select-all-nodes');
-const editModeButton = document.getElementById('edit-mode-toggle');
-const createGraphButton = document.getElementById('create-new-graph');
-const viewGraphsButton = document.getElementById('view-saved-graphs');
-const exportGraphButton = document.getElementById('export-graph');
-const exportOnlyVisibleGraphButton = document.getElementById('export-visible-graph');
-const importGraphButton = document.getElementById('import-graph');
-const importRemoteGraphButton = document.getElementById('import-remote-graph');
-const importMergeGraphButton = document.getElementById('import-merge-graph');
+
+
+let graphContextMenu, addNodeButton, addEdgeButton, selectAllNodesButton, editModeButton, createGraphButton, viewGraphsButton, exportGraphButton, exportOnlyVisibleGraphButton, importGraphButton, importRemoteGraphButton, importMergeGraphButton
+
+document.addEventListener('networkNavigatorContentLoaded', function () {
+
+ graphContextMenu = document.getElementById('graph-context-menu');
+ addNodeButton = document.getElementById('add-node');
+ selectAllNodesButton = document.getElementById('select-all-nodes');
+ editModeButton = document.getElementById('edit-mode-toggle');
+ createGraphButton = document.getElementById('create-new-graph');
+ viewGraphsButton = document.getElementById('view-saved-graphs');
+ exportGraphButton = document.getElementById('export-graph');
+ exportOnlyVisibleGraphButton = document.getElementById('export-visible-graph');
+ importGraphButton = document.getElementById('import-graph');
+ importRemoteGraphButton = document.getElementById('import-remote-graph');
+ importMergeGraphButton = document.getElementById('import-merge-graph');
+
+ graphContextMenu.addEventListener('contextmenu', (event) => { // do not show a context menu on the context menu
+    event.preventDefault();
+});
+})
+
 
 let clickedPosition
 let editMode = false
 
-graphContextMenu.addEventListener('contextmenu', (event) => { // do not show a context menu on the context menu
-    event.preventDefault();
-});
+
 
 export const addGraphContextMenu = (cy) => {
     initialiseViewGraphsButton(cy);

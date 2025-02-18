@@ -1,14 +1,18 @@
-const filterButton = document.getElementById('filterButton');
-const applyFilterButton = document.getElementById('applyFilter');
-const resetFilterButton = document.getElementById('resetFilter');
-const filterPanel = document.getElementById('filterPanel');
-const closePanelButton = document.getElementById('closePanelButton');
-const filterValueInput = document.getElementById('filterValue'); // .value.toLowerCase();
-const includeConnectedCheckBox = document.getElementById('includeConnected'); //.checked
-const includeSelectedCheckBox = document.getElementById('includeSelected'); //.checked
-const includeVisibleCheckBox = document.getElementById('includeVisible');
-const includePathCheckBox = document.getElementById('includePath');
 
+let filterButton, applyFilterButton, resetFilterButton, filterPanel, closePanelButton, filterValueInput, includeConnectedCheckBox, includeSelectedCheckBox, includeVisibleCheckBox, includePathCheckBox
+
+document.addEventListener("networkNavigatorContentLoaded", () => {
+ filterButton = document.getElementById('filterButton');
+ applyFilterButton = document.getElementById('applyFilter');
+ resetFilterButton = document.getElementById('resetFilter');
+ filterPanel = document.getElementById('filterPanel');
+ closePanelButton = document.getElementById('closePanelButton');
+ filterValueInput = document.getElementById('filterValue'); // .value.toLowerCase();
+ includeConnectedCheckBox = document.getElementById('includeConnected'); //.checked
+ includeSelectedCheckBox = document.getElementById('includeSelected'); //.checked
+ includeVisibleCheckBox = document.getElementById('includeVisible');
+ includePathCheckBox = document.getElementById('includePath');
+})
 export const initializeFilter = (cy) => {
     filterButton.addEventListener('click', () => {
         filterPanel.style.display = 'block';

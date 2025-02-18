@@ -1,8 +1,14 @@
-const modal = document.getElementById('propertiesPanel');
-const propertyList = document.getElementById('propertyList');
-const closeButton = document.getElementById('close');
-const modalTitle = document.getElementById('propertiesPanelTitle');
-
+let modal, propertyList, closeButton, modalTitle
+document.addEventListener('networkNavigatorContentLoaded', function () {
+    modal = document.getElementById('propertiesPanel');
+    propertyList = document.getElementById('propertyList');
+    closeButton = document.getElementById('close');
+    modalTitle = document.getElementById('propertiesPanelTitle');
+    closeButton.addEventListener('click', () => {
+        // Simply hide the modal without making changes
+        hideElementPropertiesModal();
+    });
+})
 
 let nodeToShow = null;
 let edgeToShow = null;
@@ -51,14 +57,14 @@ const showModal = (cy, element) => {
         // if key ends with image than show image
         else if (key.toLocaleLowerCase().endsWith('image')) {
             const image = document.createElement('img');
-            if (value.startsWith('url("')) {                
+            if (value.startsWith('url("')) {
                 //remove first 5 and last 2 characters                
                 const v = value.substring(5, value.length - 2);
                 image.src = v;
             }
             else
                 image.src = value;
-            
+
             image.width = 100;
             image.height = 100;
             div.appendChild(image);
@@ -79,12 +85,6 @@ export const hideElementPropertiesModal = () => {
     edgeToShow = null;
     modal.style.display = 'none';
 };
-
-
-closeButton.addEventListener('click', () => {
-    // Simply hide the modal without making changes
-    hideElementPropertiesModal();
-});
 
 const getTopValuesForProperty = (cy, propertyKey) => {
     const values = {};

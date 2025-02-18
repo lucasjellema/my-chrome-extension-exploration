@@ -1,11 +1,14 @@
-const layoutButton = document.getElementById('layoutButton');
-const applyLayoutButton = document.getElementById('applyLayout');
-const layoutPanel = document.getElementById('layoutPanel');
-const closePanelButton = document.getElementById('closeLayoutPanelButton');
-const layoutValueInput = document.getElementById('layoutValue'); // .value.toLowerCase();
-const onlyVisibleCheckBox = document.getElementById('onlyVisible'); //.checked
-const onlySelectedCheckBox = document.getElementById('onlySelected'); //.checked
+let layoutButton, applyLayoutButton, layoutPanel, closePanelButton, layoutValueInput, onlyVisibleCheckBox, onlySelectedCheckBox
 
+document.addEventListener("networkNavigatorContentLoaded", () => {
+    layoutButton = document.getElementById('layoutButton');
+    applyLayoutButton = document.getElementById('applyLayout');
+    layoutPanel = document.getElementById('layoutPanel');
+    closePanelButton = document.getElementById('closeLayoutPanelButton');
+    layoutValueInput = document.getElementById('layoutValue'); // .value.toLowerCase();
+    onlyVisibleCheckBox = document.getElementById('onlyVisible'); //.checked
+    onlySelectedCheckBox = document.getElementById('onlySelected'); //.checked
+})
 
 export const initializeLayout = (cy) => {
     layoutButton.addEventListener('click', () => {
@@ -53,9 +56,9 @@ const applyLayout = (cy) => {
         }
 
         if (layoutValue === 'euler') {
-            newLayout.mass= 2
-            newLayout.springLength= 80
-            
+            newLayout.mass = 2
+            newLayout.springLength = 80
+
         }
         const theElements = cy.collection();
         // add currently selected elements

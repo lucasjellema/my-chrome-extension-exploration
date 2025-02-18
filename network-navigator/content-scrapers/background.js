@@ -64,7 +64,7 @@ async function handleLinkedInInfo(info, tab) {
   //await chrome.sidePanel.open({ tabId: tab.id });
   (async () => {
     const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
-    const response = await chrome.tabs.sendMessage(tab.id, { type: 'linkedInInfoRequest' });
+    const response = await chrome.tabs.sendMessage(tab.id, { type: 'linkedInInfoRequestForNetwork' });
     console.log(response);
     chrome.runtime.sendMessage({
       type: 'linkedInProfile',
@@ -94,7 +94,7 @@ async function handleImdbInfo(info, tab) {
   console.log('imdb info clicked ', info);
   (async () => {
     const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
-    const response = await chrome.tabs.sendMessage(tab.id, { type: 'imdbInfoRequest' });
+    const response = await chrome.tabs.sendMessage(tab.id, { type: 'imdbInfoRequestForNetwork' });
     console.log(response);
     chrome.runtime.sendMessage({
       type: 'imdbProfile',
@@ -111,7 +111,7 @@ async function handleLinkInfo(info, tab) {
 
   (async () => {
     const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
-    const response = await chrome.tabs.sendMessage(tab.id, { type: 'linkInfoRequest', href: info.linkUrl });
+    const response = await chrome.tabs.sendMessage(tab.id, { type: 'linkInfoRequestForNetwork', href: info.linkUrl });
     console.log(response);
     // publish link details for use in side_panel.js
     chrome.runtime.sendMessage({

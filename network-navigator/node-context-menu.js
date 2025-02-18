@@ -9,11 +9,14 @@ document.addEventListener("editModeToggled", (event) => {
     console.log("Edit mode toggled", editMode);
 });
 
-const nodeContextMenu = document.getElementById('node-context-menu');
+let nodeContextMenu
+document.addEventListener('networkNavigatorContentLoaded', function () {
+     nodeContextMenu = document.getElementById('node-context-menu');
 
-nodeContextMenu.addEventListener('contextmenu', (event) => { // do not show a context menu on the context menu
-    event.preventDefault();
-});
+    nodeContextMenu.addEventListener('contextmenu', (event) => { // do not show a context menu on the context menu
+        event.preventDefault();
+    });
+    })
 
 export const addNodeContextMenu = (cy) => {
 
